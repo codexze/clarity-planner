@@ -1,0 +1,3 @@
+from apps.clients.routing import websocket_urlpatterns as clients_websockets
+
+websocket_urlpatterns = clients_websockets
