@@ -1,17 +1,17 @@
 from django.db import models
 from apps.core.models import Subrecord
-from apps.authorize.models import User, EmployeeUserManager
+from apps.authorize.models import User, StaffManager
 
 class ServiceType(models.TextChoices):
-    HAIR = "HAIR"
-    MAKEUP = "MAKEUP"
-    MASSAGES = "MASSAGES"
-    WAXING = "WAXING"
-    FACIALS = "FACIALS"
-    OTHER = "OTHER"
+    hair = "HAIR"
+    makeup = "MAKEUP"
+    massages = "MASSAGES"
+    waxing = "WAXING"
+    facials = "FACIALS"
+    other = "OTHER"
         
 class Service(Subrecord):
-    type = models.CharField(choices=ServiceType.choices, default=ServiceType.OTHER)
+    type = models.CharField(choices=ServiceType.choices, default=ServiceType.other)
     name = models.CharField(max_length=255)
     description = models.TextField()
     duration = models.TimeField()
@@ -59,8 +59,8 @@ class Addon(models.Model):
     def __str__(self):
         return self.display
     
-class Employee(User):
-    objects = EmployeeUserManager()
+class Staff(User):
+    objects = StaffManager()
 
     class Meta:
         proxy = True  # This tells Django not to create a new table
@@ -68,8 +68,8 @@ class Employee(User):
     def __str__(self):
         return f"Staff: {self.username}"
     
-class EmployeeService(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.PROTECT)
+class StaffService(models.Model):
+    employee = models.ForeignKey(User, on_delete=models.PROTECT)
     service = models.ForeignKey(Service, on_delete=models.PROTECT)
 
     class Meta:

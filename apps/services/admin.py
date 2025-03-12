@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Service, Addon, Employee, EmployeeService
+from .models import Service, Addon, Staff, StaffService
 
 class ServicesAdmin(admin.ModelAdmin):
     list_display = ['name', 'type', 'price', 'active']

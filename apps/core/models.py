@@ -85,16 +85,18 @@ class Subrecord(models.Model):
         if not self.id:  # Only set on the first save
             self.created = timezone.now()
     
-    def set_record(self, user, changed):
+    def set_record(self, user, changed=True):
         """
         Set the record's timestamps and user fields based on the operation.
         """
         if changed:
             self.set_updated_by_id(None, user)
             self.set_updated(None, user)
+            self.save()
         else:
             self.set_created_by_id(None, user)
             self.set_created(None, user)
+            self.save()
 
     def update_from_kwargs(self, **kwargs):
         """
@@ -145,3 +147,4 @@ class LookupList(models.Model):
 
     def __str__(self):
         return f"{self.key}: {self.value}"
+    

@@ -1,9 +1,14 @@
 from django.urls import path
-from .views import GenderView, ClientView
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    path('', ClientView.as_view(), name='client-list-create'),  # List all clients / create new
-    path('<int:client_id>/', ClientView.as_view(), name='client-detail'),  # Retrieve, update, delete
-    path('genders/', GenderView.as_view(), name='gender-list'), # List all clients
-    path('genders/<str:gender_value>/', GenderView.as_view(), name='gender-detail') # Retrieve
-]   
+from . import views
+
+router = DefaultRouter()
+
+router.register(r'namespace', views.ClientView, basename='clients')
+router.register(r'genders', views.GenderView, basename='genders')
+
+urlpatterns = []
+
+urlpatterns += router.urls
+

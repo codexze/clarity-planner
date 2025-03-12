@@ -1,7 +1,14 @@
 from django.urls import path
-from .views import ServiceView
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    path('', ServiceView.as_view(), name='service-list-create'),  # List all services / create new
-    path('<int:service_id>/', ServiceView.as_view(), name='service-detail'),  # Retrieve, update, delete
-]
+from . import views
+
+router = DefaultRouter()
+
+router.register(r'namespace', views.ServiceView, basename='services')
+router.register(r'service_types', views.ServiceTypeView, basename='service_types')
+router.register(r'employee', views.StaffView, basename='employee')
+
+urlpatterns = []
+
+urlpatterns += router.urls

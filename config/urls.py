@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/authorize/', include('apps.authorize.urls')),
     path('api/services/', include('apps.services.urls')),
     path('api/clients/', include('apps.clients.urls')),
+    path('api/planning/', include('apps.planning.urls')),
 ]
 
 

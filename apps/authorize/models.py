@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission, UserManager
 
@@ -18,17 +19,35 @@ class User(AbstractUser):
     @property
     def name(self):
         return self.get_full_name()
+    
+    @property
+    def age(self):
+        if self.date_of_birth:
+            today = datetime.date.today()
+            born = self.date_of_birth
+            return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+        return None
+    
+    @property
+    def display(self):
+        return f"{self.name} ({self.age}Y)" if self.age else f"{self.name} -Y)"
+    
+    def __str__(self):
+        return self.name
 
     def has_role(self, group):
         return self.groups.filter(name=group).exists()
     
-
-class ManagerUserManager(UserManager):
-    """Custom manager to return only manager users"""
-    def get_queryset(self):
-        return super().get_queryset().filter(groups__name="manager")
-    
-class EmployeeUserManager(UserManager):
+class StaffManager(UserManager):
     """Custom manager to return only staff users"""
     def get_queryset(self):
-        return super().get_queryset().filter(groups__name="employee")
+        return super().get_queryset().filter(groups__isnull=False)
+    
+    def role(self, role):
+        return self.get_queryset().filter(groups__name=role)
+    
+    def managers(self):
+        return self.role('manager')
+
+    def employees(self):
+        return self.role('employee')

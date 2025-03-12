@@ -1,11 +1,14 @@
 import axios from "axios";
 import store from "@/store";
+import router from "@/router";
 
 const instance = axios.create({
 	paramsSerializer: {
 		indexes: null, // array indexes format (null - no brackets, false (default) - empty brackets, true - brackets with indexes)
 	},
 });
+
+instance.defaults.baseURL = "http://localhost:8080/";
 
 instance.interceptors.request.use(
 	(config) => {
@@ -19,51 +22,52 @@ instance.interceptors.request.use(
 );
 
 instance.interceptors.response.use(
-	(response) => response,
+	(response) => {
+		return response;
+	}, // Directly return successful responses.
 	async (error) => {
-		const originalRequest = error.config;
+		if (error.response) {
+			const { status } = error.response;
 
-		// If token expired and refresh token exists, attempt to refresh
-		if (error.response?.status === 401 && !originalRequest._retry) {
-			originalRequest._retry = true;
+			// Handle 401 Unauthorized error
+			if (router.currentRoute.value.path !== "/login" && status === 401) {
+				const originalRequest = error.config;
 
-			try {
-				const refreshToken = store.state.auth.refreshToken;
-				if (!refreshToken) {
-					this.$router.push("/logout"); // No refresh token? Redirect to logout
-					// store.dispatch("auth/logout"); // No refresh token? Log out user
-					return Promise.reject(error);
+				// Prevent infinite loops - only attempt refresh once
+				if (!originalRequest._retry) {
+					originalRequest._retry = true;
+
+					try {
+						// Try to refresh the token
+						const refreshToken = store.state.auth.refreshToken;
+
+						if (!refreshToken) {
+							// No refresh token available, force logout
+							router.push({ path: "/logout", replace: true });
+							return Promise.reject(error);
+						}
+
+						// Make a request to refresh the token
+						const response = await store.dispatch("auth/refresh_token", refreshToken);
+
+						// If token refresh was successful
+						if (response.data.accessToken) {
+							// Update the token in the store
+							await store.dispatch("auth/refresh_token", response.data.accessToken);
+
+							// Refresh the page instead of retrying the request
+							window.location.reload();
+							return new Promise(() => {});
+						}
+					} catch (refreshError) {
+						// Token refresh failed, force logout
+						router.push({ path: "/logout", replace: true });
+						return Promise.reject(refreshError);
+					}
 				}
-
-				// Attempt to refresh token
-				// const response = await axios.post(`${API_URL}token/refresh/`, { refresh: refreshToken });
-				const response = await store.dispatch("auth/refresh_token");
-				store.commit("auth/SET_ACCESS_TOKEN", response.access); // Update token in Vuex
-
-				// Retry the original request with the new token
-				axiosInstance.defaults.headers.Authorization = `Bearer ${response.access}`;
-				return axiosInstance(originalRequest);
-			} catch (refreshError) {
-				store.dispatch("auth/logout"); // Failed to refresh? Log out user
-				return Promise.reject(refreshError);
 			}
 		}
-		return Promise.reject(error);
+		return Promise.reject(error); // For all other errors, return the error as is.
 	}
 );
-
-// Check token expiration periodically
-// setInterval(() => {
-// 	const token = store.state.auth.accessToken;
-// 	if (!token) return;
-
-// 	const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-// 	const expirationTime = tokenPayload.exp * 1000;
-// 	const timeRemaining = expirationTime - Date.now();
-
-// 	if (timeRemaining < 60000) {
-// 		alert("⚠️ Your session is about to expire! Please refresh your token.");
-// 	}
-// }, 30000);
-
 export default instance;

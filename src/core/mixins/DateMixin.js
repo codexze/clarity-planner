@@ -108,7 +108,7 @@ export default {
 		});
 
 		setInterval(() => {
-			this.currentDateTime = this.timeNow();
+			this.currentDateTime = this.dateTimeNow();
 		}, 1000);
 	},
 };

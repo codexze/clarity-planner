@@ -16,6 +16,14 @@ export default {
 		},
 	},
 	methods: {
+		formatErrors(errorResponse) {
+			if (errorResponse.detail) {
+				this.toastError(errorResponse.detail);
+				return {};
+			} else {
+				return errorResponse;
+			}
+		},
 		checkUserPermission(codename, user_permission) {
 			if (this.user?.is_staff) return true; // override permissions for staff user
 

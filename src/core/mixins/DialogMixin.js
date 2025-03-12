@@ -1,34 +1,81 @@
+import { useToast } from "vue-toastification";
+
 export default {
+	data() {
+		return {};
+	},
 	methods: {
-		toast(title, message, variant, sticky = false, delay = 1000, hideCloseButton = true) {
-			this.$bvToast.toast(message, {
-				solid: true,
-				title: title,
-				variant: variant,
-				noAutoHide: sticky,
-				autoHideDelay: delay,
-				noCloseButton: hideCloseButton,
-			})
+		toastError(message, timeout = 5000) {
+			const toast = useToast();
+			toast.error(message, {
+				position: "bottom-center",
+				timeout: timeout,
+				closeOnClick: false,
+				pauseOnFocusLoss: true,
+				pauseOnHover: true,
+				draggable: true,
+				draggablePercent: 0.6,
+				showCloseButtonOnHover: true,
+				hideProgressBar: true,
+				closeButton: "button",
+				icon: true,
+				rtl: false,
+			});
 		},
-		dialog(title, message, okTitle = "Confirm", cancelTitle = "Cancel", okVariant = "danger") {
-			return this.$bvModal
-			.msgBoxConfirm(message, {
-				title: title,
-				size: "md",
-				buttonSize: "lg",
-				okVariant: "danger",
-				okTitle: okTitle,
-				cancelTitle: cancelTitle,
-				footerClass: "p-2",
-				hideHeaderClose: false,
-				centered: true,
-			})
-			.then((value) => {
-				return value
-			})
-			.catch((err) => {
-				// An error occurred
-			})
-		}
-	}
-}
+		toastWarning(message, timeout = 5000) {
+			const toast = useToast();
+			toast.warning(message, {
+				position: "bottom-center",
+				timeout: timeout,
+				closeOnClick: false,
+				pauseOnFocusLoss: true,
+				pauseOnHover: true,
+				draggable: true,
+				draggablePercent: 0.6,
+				showCloseButtonOnHover: true,
+				hideProgressBar: true,
+				closeButton: "button",
+				icon: true,
+				rtl: false,
+			});
+		},
+		toastSuccess(message, timeout = 5000) {
+			const toast = useToast();
+			toast.success(message, {
+				position: "bottom-center",
+				timeout: timeout,
+				closeOnClick: false,
+				pauseOnFocusLoss: true,
+				pauseOnHover: true,
+				draggable: true,
+				draggablePercent: 0.6,
+				showCloseButtonOnHover: true,
+				hideProgressBar: true,
+				closeButton: "button",
+				icon: true,
+				rtl: false,
+			});
+		},
+		toastInfo(message, timeout = 5000) {
+			const toast = useToast();
+			toast.info(message, {
+				position: "bottom-center",
+				timeout: timeout,
+				closeOnClick: false,
+				pauseOnFocusLoss: true,
+				pauseOnHover: true,
+				draggable: true,
+				draggablePercent: 0.6,
+				showCloseButtonOnHover: true,
+				hideProgressBar: true,
+				closeButton: "button",
+				icon: true,
+				rtl: false,
+			});
+		},
+		toastComponent(component, timeout = false, options = {}) {
+			const toast = useToast();
+			toast(component, { timeout: timeout, ...options });
+		},
+	},
+};

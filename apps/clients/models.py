@@ -4,15 +4,15 @@ from django.db import models
 from apps.core.models import *
 
 class Gender(models.TextChoices):
-    MALE = "MALE"
-    FEMALE = "FEMALS"
-    UNKNOWN = "UNKNOWN"
+    male = "MALE"
+    female = "FEMALS"
+    unknown = "UNKNOWN"
 
 class Client(Subrecord):
     first_name = models.CharField(max_length=255)
     surname = models.CharField(max_length=255)
     date_of_birth = models.DateField()
-    gender = models.CharField(choices=Gender.choices, default=Gender.UNKNOWN)
+    gender = models.CharField(choices=Gender.choices, default=Gender.unknown)
     emailaddress = models.CharField(max_length=255, blank=True, null=True)
     mobile = models.CharField(max_length=50, blank=True, null=True)
     active = models.BooleanField(default=True) #switched off make client inactive and not in default filter

@@ -1,4 +1,5 @@
 import { guardAgainstReservedFieldName, isArray, merge } from "./helpers";
+import equal from "deep-equal";
 
 class Form {
 	/**

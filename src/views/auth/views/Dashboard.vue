@@ -1,8 +1,9 @@
 <template>
-	<div></div>
+	<!-- {{ currentDateTime }} -->
 </template>
 
 <script>
+import store from "@/store";
 // import { mapActions } from "vuex";
 
 export default {
@@ -12,3 +13,4 @@ export default {
 	methods: {},
 };
 </script>
+∑
