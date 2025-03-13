@@ -55,8 +55,8 @@ CLARITY_APPS = [
     "apps.authorize",
     "apps.core",
     "apps.clients",
+    "apps.inhouse",
     "apps.planning",
-    "apps.services",
 ]
 
 INSTALLED_APPS = SYSTEM_APPS + EXT_APPS + CLARITY_APPS

@@ -19,8 +19,8 @@ def start(cmd):
     cmd.stdout.write(cmd.style.SUCCESS( 'Creating user: manager'), ending='\n')
     user, created = User.objects.get_or_create(username='manager')
     if created:
-        user.first_name = "Clarity"
-        user.last_name = "Manager"
+        user.first_name = "Manager"
+        user.last_name = "Clarity"
         user.email = "manager@clarity.sr"
         user.set_password('admin1')
         user.groups.add(manager)
@@ -31,8 +31,8 @@ def start(cmd):
     cmd.stdout.write(cmd.style.SUCCESS( 'Creating user: employee_a'), ending='\n')
     user, created = User.objects.get_or_create(username='employee_a')
     if created:
-        user.first_name = "Clarity"
-        user.last_name = "Emplyee A"
+        user.first_name = "Emplyee A"
+        user.last_name = "Clarity"
         user.email = "a.employee@clarity.sr"
         user.set_password('admin1')
         user.groups.add(employee)
@@ -43,8 +43,8 @@ def start(cmd):
     cmd.stdout.write(cmd.style.SUCCESS( 'Creating user: employee_b'), ending='\n')
     user, created = User.objects.get_or_create(username='employee_b')
     if created:
-        user.first_name = "Clarity"
-        user.last_name = "EmployeeB"
+        user.first_name = "Employee B"
+        user.last_name = "Clarity"
         user.email = "b.employee@clarity.sr"
         user.set_password('admin1')
         user.groups.add(employee)

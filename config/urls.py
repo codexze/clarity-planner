@@ -21,8 +21,8 @@ from .routing import websocket_urlpatterns
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/authorize/', include('apps.authorize.urls')),
-    path('api/services/', include('apps.services.urls')),
     path('api/clients/', include('apps.clients.urls')),
+    path('api/inhouse/', include('apps.inhouse.urls')),
     path('api/planning/', include('apps.planning.urls')),
 ]
 

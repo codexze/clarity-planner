@@ -24,6 +24,7 @@ const navigation = [
 	{ name: "Planning", href: `/planning/${user?.username}`, current: false },
 	{ name: "Clients", href: "/clients", current: false },
 	{ name: "Services", href: "/services", current: false },
+	{ name: "Staff", href: "/staff", current: false },
 ];
 const userNavigation = [
 	{ name: "Account", href: "/account" },

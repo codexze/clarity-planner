@@ -4,6 +4,7 @@ import auth from "./modules/auth";
 import services from "./modules/services";
 import clients from "./modules/clients";
 import planning from "./modules/planning";
+import staff from "./modules/staff";
 
 export default createStore({
 	modules: {
@@ -11,5 +12,6 @@ export default createStore({
 		services,
 		clients,
 		planning,
+		staff,
 	},
 });

@@ -5,7 +5,7 @@ from colorfield.fields import ColorField
 from apps.core.models import *
 from apps.authorize.models import User
 from apps.clients.models import Client
-from apps.services.models import Service
+from apps.inhouse.models import Service
 
 
 DATE_FORMAT_REVERSED = "%Y-%m-%d"

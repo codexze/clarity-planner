@@ -9,6 +9,7 @@ import Dashboard from "@/views/auth/views/Dashboard.vue";
 import serviceRoutes from "./modules/services";
 import clientRoutes from "./modules/clients";
 import planningRoutes from "./modules/planning";
+import staffRoutes from "./modules/staff";
 
 const redirectLogout = (to, from, next) => {
 	const store = useStore();
@@ -49,7 +50,7 @@ const baseRoutes = [
 	
 ];
 
-const routes = baseRoutes.concat(serviceRoutes, clientRoutes, planningRoutes);
+const routes = baseRoutes.concat(serviceRoutes, clientRoutes, planningRoutes, staffRoutes);
 
 const router = createRouter({
 	history: createWebHistory(process.env.BASE_URL),

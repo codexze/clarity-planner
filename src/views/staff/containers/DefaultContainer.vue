@@ -1,7 +1,7 @@
 <template>
 	<div class="h-full">
 		<Navbar :current_user="user" :navigation="navigation" :user_navigation="userNavigation" />
-		<Header label="Appointments"></Header>
+		<Header label="Clients"></Header>
 		<main>
 			<div class="mx-auto max-w-8xl px-4 py-6 sm:px-6 lg:px-8">
 				<router-view :key="$route.fullPath"></router-view>
@@ -21,10 +21,10 @@ const user = store.state.auth.user;
 
 const navigation = [
 	{ name: "Home", href: "/dashboard", current: false },
-	{ name: "Planning", href: `/planning/${user?.username}`, current: true },
+	{ name: "Planning", href: `/planning/${user?.username}`, current: false },
 	{ name: "Clients", href: "/clients", current: false },
 	{ name: "Services", href: "/services", current: false },
-	{ name: "Staff", href: "/staff", current: false },
+	{ name: "Staff", href: "/staff", current: true },
 ];
 const userNavigation = [
 	{ name: "Account", href: "/account" },

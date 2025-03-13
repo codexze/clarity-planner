@@ -20,10 +20,11 @@ const store = useStore();
 const user = store.state.auth.user;
 
 const navigation = [
-	{ name: "Home", href: "/dashboard", current: true },
+	{ name: "Home", href: "/dashboard", current: false },
 	{ name: "Planning", href: `/planning/${user?.username}`, current: false },
 	{ name: "Clients", href: "/clients", current: false },
 	{ name: "Services", href: "/services", current: true },
+	{ name: "Staff", href: "/staff", current: false },
 ];
 const userNavigation = [
 	{ name: "Account", href: "/account" },

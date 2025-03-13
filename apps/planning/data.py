@@ -1,8 +1,9 @@
 import math, random, datetime
 from faker import Faker
 from apps.clients.models import Client
-from apps.services.models import Service, Staff
+from apps.inhouse.models import Service, Staff
 from .models import CalendarSettings, CalendarEventSlot, Appointment
+from apps.authorize.models import User
 
 fake = Faker()
 
@@ -44,5 +45,8 @@ def appointments(n=10):
         appointment = Appointment(client=client ,service=service ,employee=employee ,start=start ,end=end ,charges=charges)
         appointments.append(appointment)
 
-    Appointment.objects.bulk_create(appointments)
+    user = User.objects.get(username="super")
+    created_appointments = Appointment.objects.bulk_create(appointments)
+    for appointment in created_appointments:
+        appointment.set_record(user, False)
     print(f"✅ CREATED {n} FAKE APPOINTMENTS!")

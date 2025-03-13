@@ -5,9 +5,9 @@ from . import views
 
 router = DefaultRouter()
 
-router.register(r'namespace', views.ServiceView, basename='services')
+router.register(r'services', views.ServiceView, basename='services')
 router.register(r'service_types', views.ServiceTypeView, basename='service_types')
-router.register(r'employee', views.StaffView, basename='employee')
+router.register(r'staff', views.StaffView, basename='staff')
 
 urlpatterns = []
 
