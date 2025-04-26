@@ -61,29 +61,29 @@ class Subrecord(models.Model):
         """
         Set the 'created_by' field to the given user only if the record is new.
         """
-        if not self.id:  # Only assign on first save
-            self.created_by = user
+        # if not self.id:  # Only assign on first save
+        self.created_by = user
 
     def set_updated_by_id(self, incoming_value, user, *args, **kwargs):
         """
         Update the 'updated_by' field to the given user if the record already exists.
         """
-        if self.id:  # Only assign if the record exists
-            self.updated_by = user
+        # if self.id:  # Only assign if the record exists
+        self.updated_by = user
 
     def set_updated(self, incoming_value, user, *args, **kwargs):
         """
         Set the 'updated' timestamp to the current time if the record exists.
         """
-        if self.id:  # Only set if the record exists
-            self.updated = timezone.now()
+        # if self.id:  # Only set if the record exists
+        self.updated = timezone.now()
 
     def set_created(self, incoming_value, user, *args, **kwargs):
         """
         Set the 'created' timestamp to the current time if the record is new.
         """
-        if not self.id:  # Only set on the first save
-            self.created = timezone.now()
+        # if not self.id:  # Only set on the first save
+        self.created = timezone.now()
     
     def set_record(self, user, changed=True):
         """

@@ -19,7 +19,7 @@ class AppointmentPagination(pagination.PageNumberPagination):
 class AppointmentFilter(filters.FilterSet):
     search = filters.CharFilter(method='filter_search', label="Search")
     type = filters.CharFilter(field_name='type', lookup_expr='iexact')
-    status = filters.BooleanFilter(field_name='active', lookup_expr='exact')
+    status = filters.BooleanFilter(field_name='is_active', lookup_expr='exact')
     order_by = filters.CharFilter(method='filter_order_by', label="Order By")
 
     class Meta:
@@ -27,7 +27,7 @@ class AppointmentFilter(filters.FilterSet):
         fields = {
             # 'type': ['exact'],  # Filter by exact match
             # 'price': ['lt', 'gt', 'exact'],  # Less than, greater than, exact price
-            # 'active': ['exact'],  # Active services only
+            # 'is_active': ['exact'],  # Active services only
         }
 
     def filter_search(self, queryset, name, value):

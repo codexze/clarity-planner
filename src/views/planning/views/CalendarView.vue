@@ -46,8 +46,10 @@ export default {
 		...mapActions("planning", ["getConfig", "getEmployees"]),
 
 		handleEventClassNames(args) {
-			const color = this.blockmode ? this.config?.colors?.BLOCKED : this.config?.colors?.APPOINTMENT;
-			this.$refs.fullCalendar.setOption("eventColor", color);
+			if (this.blockmode) {
+				const color = this.config?.colors?.BLOCKED;
+				this.$refs.fullCalendar.setOption("eventColor", color);
+			}
 			return args;
 		},
 		handleDateSelect(selectInfo) {

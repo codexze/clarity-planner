@@ -1,29 +1,7 @@
 <template>
 	<div class="relative overflow-x-auto p-4 g-white shadow-md sm:rounded-lg">
 		<div class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white">
-			<!-- Search Bar -->
-			<div class="relative mb-4">
-				<div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
-					<MagnifyingGlassIcon class="w-4 h-4 text-gray-500" />
-				</div>
-				<input type="text" v-model="searchQuery" @input="debouncedFilter" placeholder="Search services..." class="block p-2 ps-10 border border-gray-300 rounded-md" />
-			</div>
-
-			<div class="relative mb-4">
-				<!-- Type Dropdown -->
-				<select v-model="selectedType" @input="debouncedFilter" class="block p-2 ps-8 pe-8 text-sm border border-gray-300 rounded-md">
-					<option value="">All Service Type</option>
-					<option v-for="type in serviceTypes" :key="type.value" :value="type.value">
-						{{ type.label }}
-					</option>
-				</select>
-				<!-- Availability Dropdown -->
-				<select v-model="status" @input="debouncedFilter" class="block mt-2 p-2 ps-8 pe-13 text-sm border border-gray-300 rounded-md">
-					<option value="">All Statusses</option>
-					<option :value="true">Available</option>
-					<option :value="false">Unavailable</option>
-				</select>
-			</div>
+			<div class="relative mb-4"></div>
 
 			<!-- Create New Button -->
 			<div class="relative mb-4">
@@ -42,6 +20,32 @@
 				</p>
 			</caption>
 			<thead class="uppercase">
+				<tr class="">
+					<th class="px-4 py-2">
+						<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+							<input type="text" name="name_search" id="name_search" v-model="filters.name" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Name" />
+						</div>
+					</th>
+					<th class="px-4 py-2">
+						<select v-model="filters.type" @change="itemProvider" class="block p-2 ps-8 pe-8 text-sm border border-indigo-600 rounded-md">
+							<option :value="null">All Service Type</option>
+							<option v-for="type in serviceTypes" :key="type.id" :value="type.id">
+								{{ type.name }}
+							</option>
+						</select>
+					</th>
+					<th class="px-4 py-2"></th>
+					<th class="px-4 py-2">
+						<select v-model="filters.is_active" @change="itemProvider" class="block mt-2 p-2 ps-8 pe-13 text-sm border border-indigo-600 rounded-md">
+							<option :value="null">All Statusses</option>
+							<option :value="true">Available</option>
+							<option :value="false">Unavailable</option>
+						</select>
+					</th>
+
+					<th class="px-6 py-3"></th>
+				</tr>
+
 				<tr class="bg-gray-200">
 					<th class="px-4 py-2 text-left" @click="sorting('name')">
 						<div class="flex items-center gap-x-2">
@@ -96,11 +100,11 @@
 						<small class="text-gray-600">{{ service.description }}</small>
 					</td>
 					<td class="px-4 py-2">
-						<span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm border border-gray-500">{{ service.type }}</span>
+						<span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm border border-gray-500">{{ service.type.name }}</span>
 					</td>
 					<td class="px-4 py-2">{{ service.price }}</td>
 					<td class="px-4 py-2">
-						<span v-if="service.active" class="">
+						<span v-if="service.is_active" class="">
 							<span class="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
 								<span class="w-2 h-2 me-1 bg-green-500 rounded-full"></span>
 								Available
@@ -151,16 +155,17 @@ export default {
 			currentPage: 1,
 			pageSize: 5,
 			totalPages: 1,
+			filters: {
+				name: null,
+				type: null,
+				is_active: null,
+			},
 			sortBy: "name",
 			sortOrder: "asc",
 
 			debouncedFilter: null,
 
-			searchQuery: "",
-			status: "",
-			selectedType: "",
 			services: [],
-			filters: {},
 		};
 	},
 	computed: {
@@ -182,9 +187,6 @@ export default {
 		itemProvider() {
 			this.loading = true;
 			this.filterServices({
-				search: this.searchQuery,
-				type: this.selectedType,
-				status: this.status,
 				page: this.currentPage,
 				page_size: this.pageSize,
 				order_by: this.ordering,

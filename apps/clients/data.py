@@ -13,8 +13,8 @@ def clients(n=10):
             surname=fake.last_name(),
             date_of_birth=fake.date_of_birth(minimum_age=18, maximum_age=60),
             gender=random.choice([Gender.male, Gender.female, Gender.unknown]),
-            emailaddress=fake.email() if random.choice([True, False]) else None,
-            mobile=fake.phone_number() if random.choice([True, False]) else None,
+            email=fake.email(),
+            mobile=fake.phone_number(),
         )
         clients.append(client)
 

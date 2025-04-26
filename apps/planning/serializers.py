@@ -30,11 +30,15 @@ class CalendarConfigSerializer(serializers.ModelSerializer):
 
         return {
             'colors': {
-                'APPOINTMENT': instance.appointment_bgcolor,
-                'BLOCKED': instance.blocked_bgcolor,
+                'INHOUSE' : instance.inhouse_appointment_bgcolor,
+                'ONSITE' : instance.onsite_appointment_bgcolor,
+                'BLOCKED' : instance.blocked_bgcolor,
+                'REMINDER' : instance.reminder_bgcolor,
+                'PROCESSED' : instance.processed_bgcolor,
+                'ARRIVED' : instance.arrived_bgcolor,
             },
             'slot': {
-                'INTERVAL': 20,
+                'INTERVAL': 5,
                 'MIN': instance.current_day_hours[0],
                 'MAX': instance.current_day_hours[1],
             },
@@ -52,7 +56,9 @@ class CalendarConfigSerializer(serializers.ModelSerializer):
     
 class AppointmentSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
-    # client = ClientSerializer(read_only=True)
+    backgroundColor = serializers.SerializerMethodField()
+    borderColor = serializers.SerializerMethodField()
+    textColor = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
@@ -61,6 +67,15 @@ class AppointmentSerializer(serializers.ModelSerializer):
     def get_title(self, obj):
         """Fetches the property from the model"""
         return obj.title  
+    
+    def get_backgroundColor(self, obj):
+        return obj.color
+    
+    def get_borderColor(self, obj):
+        return obj.color
+    
+    def get_textColor(self, obj):
+        return obj.textColor
     
 
 class BlockedSerializer(serializers.ModelSerializer):

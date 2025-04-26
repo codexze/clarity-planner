@@ -8,15 +8,15 @@ from .models import User
 admin.site.unregister(Group)
 
 class UserProfileAdmin(UserAdmin):
-    list_display = ('username','first_name', 'last_name', 'date_of_birth', 'is_staff')
+    list_display = ('username','first_name', 'last_name', 'is_staff')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ( 'first_name', 'last_name', 'date_of_birth', 'email',)}),
+        ('Personal info', {'fields': ( 'first_name', 'last_name', 'date_of_birth','email','mobile',)}),
         ('Permissions', {'fields': ( 'is_active', 'is_staff', 'groups',)}),
     )
 
     add_fieldsets = (
-        (None, {'classes': ('wide',), 'fields': ( 'username', 'first_name', 'last_name', 'date_of_birth', 'email', 'password1', 'password2')}),
+        (None, {'classes': ('wide',), 'fields': ( 'username', 'first_name', 'last_name', 'date_of_birth','email','mobile', 'password1', 'password2')}),
         ('Permissions', {'fields': ( 'is_active', 'is_staff', 'groups', 'force_password_change',)})
     )
 

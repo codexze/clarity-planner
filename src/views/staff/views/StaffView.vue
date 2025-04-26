@@ -1,23 +1,7 @@
 <template>
 	<div class="relative overflow-x-auto p-4 g-white shadow-md sm:rounded-lg">
 		<div class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white">
-			<!-- Search Bar -->
-			<div class="relative mb-4">
-				<div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
-					<MagnifyingGlassIcon class="w-4 h-4 text-gray-500" />
-				</div>
-				<input type="text" v-model="searchQuery" @input="debouncedFilter" placeholder="Search employees..." class="block p-2 ps-10 border border-gray-300 rounded-md" />
-			</div>
-
-			<div class="relative mb-4">
-				<!-- Type Dropdown -->
-				<!-- <select v-model="selectedType" @input="debouncedFilter" class="block p-2 ps-8 pe-8 text-sm border border-gray-300 rounded-md">
-					<option value="">All Genders</option>
-					<option v-for="gender in genders" :key="gender.value" :value="gender.value">
-						{{ gender.label }}
-					</option>
-				</select> -->
-			</div>
+			<div class="relative mb-4"></div>
 
 			<!-- Create New Button -->
 			<div class="relative mb-4">
@@ -36,6 +20,30 @@
 				</p>
 			</caption>
 			<thead class="uppercase">
+				<tr class="">
+					<th class="px-4 py-2">
+						<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+							<input type="text" name="name_search" id="name_search" v-model="filters.name" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Name" />
+						</div>
+					</th>
+					<th class="px-4 py-2">
+						<div class="grid items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+							<input type="text" name="date_of_birth_search" id="date_of_birth_search" v-model="filters.date_of_birth" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Date of Birth" />
+						</div>
+					</th>
+					<th class="px-4 py-2">
+						<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+							<input type="text" name="email_search" id="email_search" v-model="filters.email" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Emailaddress" />
+						</div>
+					</th>
+					<th class="px-4 py-2">
+						<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+							<input type="text" name="mobile_search" id="mobile_search" v-model="filters.mobile" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Phonenumber" />
+						</div>
+					</th>
+
+					<th class="px-6 py-3"></th>
+				</tr>
 				<tr class="bg-gray-200">
 					<th class="px-4 py-2 text-left" @click="sorting('surname')">
 						<div class="flex items-center gap-x-2">
@@ -77,40 +85,24 @@
 						</div>
 					</td>
 				</tr>
-				<tr v-else v-for="client in staff" :key="client.id" class="border-b border-b-gray-200 hover:bg-gray-100">
+				<tr v-else v-for="employee in staff" :key="employee.id" class="border-b border-b-gray-200 hover:bg-gray-100">
 					<td class="px-4 py-2 font-medium text-gray-800 whitespace-nowrap">
-						<small class="text-gray-600">{{ client.id }}</small>
-						{{ client.display }}
-
-						<template v-if="client.gender == 'MALE'">
-							<small class="text-gray-600">
-								<font-awesome-icon :icon="['fas', 'mars']" />
-							</small>
-						</template>
-						<template v-else-if="client.gender == 'FEMALE'">
-							<small class="text-gray-600">
-								<font-awesome-icon :icon="['fas', 'venus']" />
-							</small>
-						</template>
-						<template v-else>
-							<small class="text-gray-600">
-								<font-awesome-icon :icon="['fas', 'venus-mars']" />
-							</small>
-						</template>
+						<small class="text-gray-600">{{ employee.id }}</small>
+						{{ employee.display }}
 					</td>
-					<td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">
-						{{ toLocaleDate(client.date_of_birth) }}
+					<td class="px-4 py-2 font-medium whitespace-nowrap" :class="employee.date_of_birth ? 'text-gray-900' : 'text-xs text-gray-400'">
+						{{ employee.date_of_birth ? toLocaleDate(employee.date_of_birth) : "n/a" }}
 					</td>
-					<td class="px-4 py-2 font-medium whitespace-nowrap" :class="client.emailaddress ? 'text-gray-900' : 'text-xs text-gray-400'">
-						{{ client.emailaddress ? client.emailaddress : "n/a" }}
+					<td class="px-4 py-2 font-medium whitespace-nowrap" :class="employee.email ? 'text-gray-900' : 'text-xs text-gray-400'">
+						{{ employee.email ? employee.email : "n/a" }}
 					</td>
-					<td class="px-4 py-2 whitespace-nowrap" :class="client.mobile ? 'text-gray-900' : 'text-xs text-gray-400'">
-						{{ client.mobile ? client.mobile : "n/a" }}
+					<td class="px-4 py-2 whitespace-nowrap" :class="employee.mobile ? 'text-gray-900' : 'text-xs text-gray-400'">
+						{{ employee.mobile ? `+${employee.mobile}` : "n/a" }}
 					</td>
 
 					<!-- Edit Button -->
 					<td class="px-6 py-4 text-right">
-						<button @click="onEdit(client.id)" class="px-4 py-2 text-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50">Edit</button>
+						<button @click="onEdit(employee.username)" class="px-4 py-2 text-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50">Edit</button>
 					</td>
 				</tr>
 			</tbody>
@@ -146,7 +138,7 @@ export default {
 			currentPage: 1,
 			pageSize: 5,
 			totalPages: 1,
-			sortBy: "surname",
+			sortBy: "last_name",
 			sortOrder: "asc",
 			selectedType: "",
 			staff: [],
@@ -214,8 +206,8 @@ export default {
 			}
 			this.itemProvider();
 		},
-		onEdit(id) {
-			this.$router.push({ path: `staff/${id}/view` });
+		onEdit(username) {
+			this.$router.push({ path: `staff/${username}/view` });
 		},
 	},
 	mounted() {
@@ -225,7 +217,6 @@ export default {
 		this.debouncedFilter = debounce(this.itemProvider, 500);
 	},
 	async beforeRouteEnter(to, from, next) {
-		// const genders = await store.dispatch("staff/getGenders");
 		return next();
 	},
 	beforeDestroy() {

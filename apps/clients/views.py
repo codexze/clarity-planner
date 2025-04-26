@@ -21,21 +21,38 @@ class ClientPagination(pagination.PageNumberPagination):
     max_page_size = 100  # Prevent very large page sizes
 
 class ClientFilter(filters.FilterSet):
-    search = filters.CharFilter(method='filter_search', label="Search")
+    name = filters.CharFilter(method='filter_name', label="Search Name")
+    date_of_birth = filters.CharFilter(method='filter_date_of_birth')
+    email = filters.CharFilter(field_name='email', lookup_expr='icontains')
+    mobile = filters.CharFilter(field_name='mobile', lookup_expr='startswith')
     gender = filters.CharFilter(field_name='gender', lookup_expr='iexact')
-    order_by = filters.CharFilter(method='filter_order_by', label="Order By")
+    order_by = filters.CharFilter(method='order_by', label="Order By")
 
     class Meta:
         model = Client
         fields = {
             'gender': ['exact'],  # Filter by exact match
-            'active': ['exact'],  # Active services only
+            'is_active': ['exact'],  # Active services only
         }
 
-    def filter_search(self, queryset, name, value):
+    def filter_name(self, queryset, name, value):
         return queryset.filter(Q(first_name__icontains=value) | Q(surname__icontains=value))
+    
 
-    def filter_order_by(self, queryset, name, value):
+    def filter_date_of_birth(self, queryset, name, value):
+        try:
+            # Try common date formats
+            for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y', '%d-%m-%Y', '%d%m%Y']:
+                try:
+                    date = datetime.datetime.strptime(value, fmt).date()
+                    return queryset.filter(date_of_birth=date)
+                except ValueError:
+                    continue
+            return queryset
+        except:
+            return queryset
+
+    def order_by(self, queryset, name, value):
         return queryset.filter().order_by(value)
 
 

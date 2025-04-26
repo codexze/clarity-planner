@@ -1,7 +1,7 @@
 <template>
 	<div class="h-full">
 		<Navbar :current_user="user" :navigation="navigation" :user_navigation="userNavigation" />
-		<Header label="Clients"></Header>
+		<Header label="Staff"></Header>
 		<main>
 			<div class="mx-auto max-w-8xl px-4 py-6 sm:px-6 lg:px-8">
 				<router-view :key="$route.fullPath"></router-view>

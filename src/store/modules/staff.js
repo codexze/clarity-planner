@@ -7,12 +7,12 @@ const state = {
 
 const getters = {
 	getStaff: (state) => state.staff,
-	getMember: (state) => state.client,
+	getEmployee: (state) => state.employee,
 };
 
 const mutations = {
-	SET_MEMBER(state, client) {
-		state.client = client;
+	SET_EMPLOYEE(state, employee) {
+		state.employee = employee;
 	},
 	SET_STAFF(state, staff) {
 		state.staff = staff;
@@ -25,20 +25,24 @@ const actions = {
 		commit("SET_STAFF", staff.data);
 		return staff.data;
 	},
-	async getMemberById({ commit }, id) {
-		const client = await session.get(`api/inhouse/staff/${id}`);
-		commit("SET_MEMBER", client.data);
-		return client.data;
+	async getEmployeeByUsername({ commit }, username) {
+		const employee = await session.get(`api/inhouse/staff/${username}`);
+		commit("SET_EMPLOYEE", employee.data);
+		return employee.data;
+	},
+	async getEmployeesByServiceType({ commit }, type) {
+		const services = await session.get(`api/inhouse/staff/service_type/${type}/`);
+		return services.data;
 	},
 	async filterStaff({ commit }, params) {
 		const staff = await session.get("api/inhouse/staff/filter/", { params: params });
 		return staff.data;
 	},
-	updateMemberById({ commit }, data) {
+	updateEmployeeByUsername({ commit }, data) {
 		return session
-			.put(`api/inhouse/staff/${data.id}/`, data)
+			.put(`api/inhouse/staff/${data.username}/`, data)
 			.then((response) => {
-				commit("SET_MEMBER", response.data);
+				commit("SET_EMPLOYEE", response.data);
 				return response.data;
 			})
 			.finally(() => {});

@@ -10,7 +10,7 @@ class CalendarSettingsAdmin(admin.ModelAdmin):
         ("", {"fields": ("user", )}),
         ("Schedule Settings", {"fields": ("enable_weekends", "business_hours", )}),
         ("Calendar Settings", {"fields": ("default_view", "event_slots", )}),
-        ("Color Settings", {"fields": ("appointment_bgcolor", "appointment_textcolor", "blocked_bgcolor", "blocked_textcolor", "processed_bgcolor", "processed_textcolor", "arrived_bgcolor", "arrived_textcolor", )}),
+        ("Color Settings", {"fields": ("inhouse_appointment_bgcolor", "inhouse_appointment_textcolor", "onsite_appointment_bgcolor", "onsite_appointment_textcolor", "blocked_bgcolor", "blocked_textcolor", "reminder_bgcolor", "reminder_textcolor", "processed_bgcolor", "processed_textcolor", "arrived_bgcolor", "arrived_textcolor",)}),
     )
 
     def save_model(self, request, obj, form, change):
@@ -18,11 +18,11 @@ class CalendarSettingsAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ["start", "end", "client", "service", "employee", "is_walkin", "arrived", "cancelation"]
-    list_filter = ["service", "employee", "is_walkin", "arrived", "cancelation" ]
+    list_display = ["start", "end", "client", "service", "employee", "is_onsite", "arrived", "cancelation"]
+    list_filter = ["service", "employee", "is_onsite", "arrived", "cancelation" ]
     search_fields = ["start", "end", "client"]
     fieldsets = (
-        ("Appointment Information", {"fields": ("client", "service", "charges", "employee","is_walkin",)}),
+        ("Appointment Information", {"fields": ("client", "service", "addons", "charges", "employee","is_onsite",)}),
         ("Arrival", {"fields": ("arrived", "arrived_time",)}),
         ("Cancelation", {"fields": ("cancelation", "cancelation_reason",)}),
     )

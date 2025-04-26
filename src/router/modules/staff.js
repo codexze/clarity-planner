@@ -1,6 +1,6 @@
 import DefaultContainer from "@/views/staff/containers/DefaultContainer.vue";
 import Staff from "@/views/staff/views/StaffView.vue";
-import StaffMemberDetails from "@/views/staff/views/StaffMemberDetailsView.vue";
+import EmployeeDetailsView from "@/views/staff/views/EmployeeDetailsView.vue";
 
 const routes = [
 	{
@@ -14,8 +14,8 @@ const routes = [
 				meta: { requiresAuth: true },
 			},
 			{
-				path: ":memberId/view",
-				component: StaffMemberDetails,
+				path: ":employeeId/view",
+				component: EmployeeDetailsView,
 				meta: { requiresAuth: true },
 			},
 		],

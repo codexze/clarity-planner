@@ -29,7 +29,7 @@ def calendar_settings():
     for employee in staff:
         CalendarSettings.create_default_settings_for(employee)
 
-def appointments(n=10):
+def appointments(n=20):
     appointments = []
     for _ in range(n):
         # Get random instances of related models
@@ -40,9 +40,9 @@ def appointments(n=10):
         timestamp = fake.date_time_this_month(after_now=True)
         start = datetime.datetime(day=timestamp.day, month=timestamp.month, year=timestamp.year, hour=timestamp.hour, minute=(math.ceil(n / 5) * 5), second=0)
         end = start + datetime.timedelta(hours=service.duration.hour, minutes=service.duration.minute, seconds=service.duration.second )
-        charges = service.price
+        price = service.price
 
-        appointment = Appointment(client=client ,service=service ,employee=employee ,start=start ,end=end ,charges=charges)
+        appointment = Appointment(client=client ,service=service ,employee=employee ,start=start ,end=end ,service_price=price)
         appointments.append(appointment)
 
     user = User.objects.get(username="super")

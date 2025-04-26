@@ -26,12 +26,6 @@ const mutations = {
 		state.refreshToken = token;
 		localStorage.setItem("refresh_token", token);
 	},
-
-	LOGOUT(state) {
-		state.user = null;
-		localStorage.removeItem("userdata");
-		localStorage.clear();
-	},
 };
 
 const actions = {
@@ -63,7 +57,7 @@ const actions = {
 		return response.data;
 	},
 	async logout({ commit }) {
-		const response = await session.post("api/authorize/logout/", { token: state.refreshToken });
+		// const response = await session.post("api/authorize/logout/", { token: state.refreshToken });
 		commit("SET_ACCESS_TOKEN", "");
 		commit("SET_REFRESH_TOKEN", "");
 		commit("SET_USER", null); // Store user data in Vuex

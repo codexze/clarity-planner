@@ -1,22 +1,14 @@
 <template>
 	<div class="relative overflow-x-auto p-4 g-white shadow-md sm:rounded-lg">
 		<div class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white">
-			<!-- Search Bar -->
-			<div class="relative mb-4">
-				<div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
-					<MagnifyingGlassIcon class="w-4 h-4 text-gray-500" />
-				</div>
-				<input type="text" v-model="searchQuery" @input="debouncedFilter" placeholder="Search clients..." class="block p-2 ps-10 border border-gray-300 rounded-md" />
-			</div>
-
 			<div class="relative mb-4">
 				<!-- Type Dropdown -->
-				<select v-model="selectedType" @input="debouncedFilter" class="block p-2 ps-8 pe-8 text-sm border border-gray-300 rounded-md">
+				<!-- <select v-model="selectedType" @input="debouncedFilter" class="block p-2 ps-8 pe-8 text-sm border border-gray-300 rounded-md">
 					<option value="">All Genders</option>
 					<option v-for="gender in genders" :key="gender.value" :value="gender.value">
 						{{ gender.label }}
 					</option>
-				</select>
+				</select> -->
 			</div>
 
 			<!-- Create New Button -->
@@ -36,6 +28,32 @@
 				</p>
 			</caption>
 			<thead class="uppercase">
+				<!-- Search Bar -->
+
+				<tr class="">
+					<th class="px-4 py-2">
+						<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+							<input type="text" name="name_search" id="name_search" v-model="filters.name" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Name" />
+						</div>
+					</th>
+					<th class="px-4 py-2">
+						<div class="grid items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+							<input type="text" name="date_of_birth_search" id="date_of_birth_search" v-model="filters.date_of_birth" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Date of Birth" />
+						</div>
+					</th>
+					<th class="px-4 py-2">
+						<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+							<input type="text" name="email_search" id="email_search" v-model="filters.email" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Emailaddress" />
+						</div>
+					</th>
+					<th class="px-4 py-2">
+						<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+							<input type="text" name="mobile_search" id="mobile_search" v-model="filters.mobile" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Phonenumber" />
+						</div>
+					</th>
+
+					<th class="px-6 py-3"></th>
+				</tr>
 				<tr class="bg-gray-200">
 					<th class="px-4 py-2 text-left" @click="sorting('surname')">
 						<div class="flex items-center gap-x-2">
@@ -101,8 +119,8 @@
 					<td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">
 						{{ toLocaleDate(client.date_of_birth) }}
 					</td>
-					<td class="px-4 py-2 font-medium whitespace-nowrap" :class="client.emailaddress ? 'text-gray-900' : 'text-xs text-gray-400'">
-						{{ client.emailaddress ? client.emailaddress : "n/a" }}
+					<td class="px-4 py-2 font-medium whitespace-nowrap" :class="client.email ? 'text-gray-900' : 'text-xs text-gray-400'">
+						{{ client.email ? client.email : "n/a" }}
 					</td>
 					<td class="px-4 py-2 whitespace-nowrap" :class="client.mobile ? 'text-gray-900' : 'text-xs text-gray-400'">
 						{{ client.mobile ? client.mobile : "n/a" }}
@@ -147,14 +165,20 @@ export default {
 			pageSize: 5,
 			totalPages: 1,
 			sortBy: "surname",
+			filters: {
+				name: null,
+				date_of_birth: null,
+				gender: null,
+				email: null,
+				mobile: null,
+			},
 			sortOrder: "asc",
+
 			selectedType: "",
+
 			clients: [],
 
 			debouncedFilter: null,
-
-			searchQuery: "",
-			filters: {},
 		};
 	},
 	computed: {
@@ -176,8 +200,6 @@ export default {
 		itemProvider() {
 			this.loading = true;
 			this.filterClients({
-				search: this.searchQuery,
-				gender: this.selectedType,
 				page: this.currentPage,
 				page_size: this.pageSize,
 				order_by: this.ordering,

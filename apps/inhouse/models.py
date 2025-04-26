@@ -1,22 +1,21 @@
+import datetime
 from django.db import models
 from apps.core.models import Subrecord
-from apps.authorize.models import User, StaffManager
+from apps.authorize.models import User, UserManager
 
-class ServiceType(models.TextChoices):
-    hair = "HAIR"
-    makeup = "MAKEUP"
-    massages = "MASSAGES"
-    waxing = "WAXING"
-    facials = "FACIALS"
-    other = "OTHER"
-        
+class ServiceType(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
 class Service(Subrecord):
-    type = models.CharField(choices=ServiceType.choices, default=ServiceType.other)
+    type = models.ForeignKey(ServiceType, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField()
     duration = models.TimeField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     @property
     def time_display(self):
@@ -36,11 +35,11 @@ class Service(Subrecord):
         return self.display
 
 class Addon(models.Model):
-    type = models.CharField(choices=ServiceType.choices)
+    type = models.ManyToManyField(ServiceType, related_name="addon")
     name = models.CharField(max_length=255)
     additional_time = models.TimeField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     @property
     def time_display(self):
@@ -54,26 +53,43 @@ class Addon(models.Model):
 
     @property
     def display(self):
-        return f"{self.type} > {self.name} ({self.time_display})"
+        return f"{self.name} ({self.time_display})"
 
     def __str__(self):
         return self.display
+
+class StaffManager(UserManager):
+    """Custom manager to return only staff users"""
+    def get_queryset(self):
+        return super().get_queryset().filter(groups__isnull=False)
+    
+    def role(self, role):
+        return self.get_queryset().filter(groups__name=role)
+    
+    def managers(self):
+        return self.role('manager')
+
+    def employees(self):
+        return self.role('employee')
     
 class Staff(User):
     objects = StaffManager()
 
     class Meta:
         proxy = True  # This tells Django not to create a new table
+        verbose_name_plural = "Staff"
 
     def __str__(self):
         return f"Staff: {self.username}"
     
+    @property
+    def services(self):
+        return self.staffservice_set.all()
+
 class StaffService(models.Model):
-    employee = models.ForeignKey(User, on_delete=models.PROTECT)
-    service = models.ForeignKey(Service, on_delete=models.PROTECT)
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
+    service_type = models.ForeignKey(ServiceType, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ('employee', 'service')  
-        
-    def __str__(self):
-        return f"{self.employee.name} ({self.service.display})"
+        unique_together = ('staff', 'service_type')

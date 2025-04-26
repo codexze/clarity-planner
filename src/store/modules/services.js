@@ -32,7 +32,6 @@ const actions = {
 	},
 	async getServicesByType({ commit }, type) {
 		const services = await session.get(`api/inhouse/services/type/${type}`);
-		commit("SET_SERVICES", services.data);
 		return services.data;
 	},
 	async getServices({ commit }) {
@@ -65,6 +64,10 @@ const actions = {
 				return response.data;
 			})
 			.finally(() => {});
+	},
+	async getAddonsByType({ commit }, type) {
+		const addon = await session.get(`api/inhouse/addons/type/${type}`);
+		return addon.data;
 	},
 };
 

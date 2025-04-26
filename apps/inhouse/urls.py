@@ -7,6 +7,7 @@ router = DefaultRouter()
 
 router.register(r'services', views.ServiceView, basename='services')
 router.register(r'service_types', views.ServiceTypeView, basename='service_types')
+router.register(r'addons', views.AddonView, basename='addons')
 router.register(r'staff', views.StaffView, basename='staff')
 
 urlpatterns = []

@@ -1,6 +1,6 @@
 <template>
 	<div class="relative overflow-x-auto p-4 g-white shadow-md sm:rounded-lg">
-		<div class="border-b border-gray-900/10 pb-12">
+		<div class="pb-12">
 			<h2 class="text-base/7 font-semibold text-gray-900">New Service</h2>
 			<p class="mt-1 text-sm/6 text-gray-600">Create a new services here.</p>
 
@@ -18,8 +18,11 @@
 				<div class="sm:col-span-2">
 					<label for="name" class="block text-sm/6 font-medium text-gray-900">Service Type</label>
 					<div class="mt-2">
-						<select id="service_types" v-model="form.type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-							<option v-for="type in serviceTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
+						<select v-model="form.type_id" class="block p-2 ps-8 pe-8 text-sm border border-indigo-600 rounded-md">
+							<option :value="null">Select a service type.</option>
+							<option v-for="type in serviceTypes" :key="type.id" :value="type.id">
+								{{ type.name }}
+							</option>
 						</select>
 					</div>
 				</div>
@@ -34,9 +37,9 @@
 
 				<div class="sm:col-span-2">
 					<label for="duration" class="block text-sm/6 font-medium text-gray-900">Duration</label>
-					<div class="mt-2">
-						<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-							<VueDatePicker v-model="form.duration" time-picker :start-time="startTime" :enable-seconds="false" :minute-increment="15" no-hours-overlay :format="'HH:mm'" placeholder="Select duration" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" />
+					<div class="mt-1">
+						<div class="flex items-center rounded-md bg-white">
+							<VueDatePicker v-model="form.duration" auto-apply :teleport="true" time-picker :start-time="startTime" :enable-seconds="false" :minute-increment="15" no-hours-overlay :format="'HH:mm'" placeholder="Select duration" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" />
 						</div>
 					</div>
 				</div>
@@ -53,7 +56,7 @@
 				<div class="sm:col-span-2">
 					<div class="flex items-start mt-8">
 						<div class="flex items-center h-5">
-							<input id="available" type="checkbox" v-model="form.active" class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" required />
+							<input id="available" type="checkbox" v-model="form.is_active" class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" required />
 						</div>
 						<label for="available" class="ms-2 text-sm font-medium text-gray-900">Availaible?</label>
 					</div>
@@ -86,12 +89,12 @@ export default {
 			startTime: { hours: 0, minutes: 0 },
 			form: new Form({
 				consistency_token: "00000000",
-				type: "OTHER",
+				type_id: null,
 				name: null,
 				description: null,
 				duration: null,
 				price: null,
-				active: true,
+				is_active: false,
 			}),
 		};
 	},

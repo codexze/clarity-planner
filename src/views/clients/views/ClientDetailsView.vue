@@ -36,15 +36,15 @@
 				<div class="sm:col-span-2">
 					<label for="date_of_birth" class="block text-sm/6 font-medium text-gray-900">Date of Birth</label>
 					<div class="">
-						<VueDatePicker :teleport="true" v-model="form.date_of_birth" placeholder="MM-DD-YYYY " format="MM-dd-yyyy" model-type="yyyy-MM-dd" :max-date="new Date()" :hide-navigation="['time']" prevent-min-max-navigation auto-position="top" text-input class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" />
+						<VueDatePicker v-mask="'##-##-####'" :teleport="true" v-model="form.date_of_birth" placeholder="MM-DD-YYYY " format="MM-dd-yyyy" model-type="yyyy-MM-dd" :max-date="new Date()" :hide-navigation="['time']" prevent-min-max-navigation auto-position="top" text-input class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" />
 					</div>
 				</div>
 				<div class="sm:col-span-2 sm:col-start-1">
-					<label for="emailaddress" class="block text-sm/6 font-medium text-gray-900">Email</label>
+					<label for="email" class="block text-sm/6 font-medium text-gray-900">Email</label>
 					<div class="mt-2">
 						<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
 							<!-- <div class="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">billybob@domain.com</div> -->
-							<input type="text" name="emailaddress" id="emailaddress" v-model="form.emailaddress" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="e.g. billybob@doamin.com" />
+							<input type="text" name="email" id="email" v-model="form.email" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="e.g. billybob@doamin.com" />
 						</div>
 					</div>
 				</div>
@@ -53,7 +53,7 @@
 					<div class="mt-2">
 						<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
 							<div class="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">+</div>
-							<input type="text" name="mobile" id="mobile" v-model="form.mobile" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="e.g. +597 000-0000" />
+							<input type="text" name="mobile" id="mobile" v-mask="['### ###-####', '## # ####-####', '# (###) ###-####']" v-model="form.mobile" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="597 000-0000" />
 						</div>
 					</div>
 				</div>
@@ -61,7 +61,7 @@
 				<div class="sm:col-span-2">
 					<div class="flex items-start mt-8">
 						<div class="flex items-center h-5">
-							<input id="available" type="checkbox" v-model="form.active" class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" required />
+							<input id="available" type="checkbox" v-model="form.is_active" class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" required />
 						</div>
 						<label for="available" class="ms-2 text-sm font-medium text-gray-900">Active?</label>
 					</div>
@@ -91,7 +91,6 @@ export default {
 	},
 	data() {
 		return {
-			startTime: { hours: 0, minutes: 0 },
 			form: new Form({
 				id: null,
 				consistency_token: null,
@@ -99,9 +98,9 @@ export default {
 				surname: null,
 				date_of_birth: null,
 				gender: "UNKNOWN",
-				emailaddress: null,
+				email: null,
 				mobile: null,
-				active: true,
+				is_active: true,
 			}),
 		};
 	},
