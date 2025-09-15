@@ -16,9 +16,9 @@
 								<div class="px-6">
 									<h3 class="text-2xl font-semibold text-gray-900 mb-1">
 										<font-awesome-icon :icon="['fas', 'calendar-days']" />
-										New Appointment
+										Appointment Details
 									</h3>
-									<p class="text-sm text-gray-500">Schedule a new appointment by filling out the details below</p>
+									<p class="text-sm text-gray-500">View and edit appointment details</p>
 								</div>
 
 								<button @click="close" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center">
@@ -59,92 +59,77 @@
 										</div>
 									</div>
 
-									<div class="sm:col-span-12">
+									<div v-if="client" class="sm:col-span-12">
 										<!-- Client Accordion -->
-										<div class="border border-gray-300 hover:border-blue-300 rounded-lg">
-											<button @click="toggleClientTable" class="w-full p-4 flex items-center justify-between text-left text-gray-900 font-medium">
-												<template v-if="!client">
-													<span>
-														Select a client
-														<p class="mt-1 text-sm font-normal text-gray-500">Browse a list of all the clients.</p>
-													</span>
-												</template>
+										<div class="border border-gray-300 hover:border-blue-300 rounded-lg p-3">
+											<span class="w-3/4">
+												<div>
+													<small class="text-gray-500">{{ client.id }}</small>
+													{{ client.display }}
 
-												<template v-else>
-													<span class="w-3/4">
-														<div>
-															<small class="text-gray-500">{{ client.id }}</small>
-															{{ client.display }}
+													<template v-if="client.gender == 'MALE'">
+														<small class="text-gray-500">
+															<font-awesome-icon :icon="['fas', 'mars']" />
+														</small>
+													</template>
+													<template v-else-if="client.gender == 'FEMALE'">
+														<small class="text-gray-500">
+															<font-awesome-icon :icon="['fas', 'venus']" />
+														</small>
+													</template>
+													<template v-else>
+														<small class="text-gray-500">
+															<font-awesome-icon :icon="['fas', 'venus-mars']" />
+														</small>
+													</template>
+												</div>
 
-															<template v-if="client.gender == 'MALE'">
-																<small class="text-gray-500">
-																	<font-awesome-icon :icon="['fas', 'mars']" />
-																</small>
-															</template>
-															<template v-else-if="client.gender == 'FEMALE'">
-																<small class="text-gray-500">
-																	<font-awesome-icon :icon="['fas', 'venus']" />
-																</small>
-															</template>
-															<template v-else>
-																<small class="text-gray-500">
-																	<font-awesome-icon :icon="['fas', 'venus-mars']" />
-																</small>
-															</template>
-														</div>
-
-														<div class="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-6 mt-2">
-															<div class="sm:col-span-2">
-																<p class="text-sm font-normal text-gray-500">
-																	<font-awesome-icon :icon="['fas', 'cake-candles']" class="text-blue-500" />
-																	{{ client.date_of_birth ? toLocaleDate(client.date_of_birth) : "n/a" }}
-																</p>
-															</div>
-															<div class="sm:col-span-2">
-																<p class="text-sm font-normal text-gray-500">
-																	<font-awesome-icon :icon="['fas', 'phone']" class="text-blue-500" />
-																	{{ client.mobile ? client.mobile : "n/a" }}
-																</p>
-															</div>
-															<div class="sm:col-span-2">
-																<p class="text-sm font-normal text-gray-500">
-																	<font-awesome-icon :icon="['fas', 'at']" class="text-blue-500" />
-																	{{ client.email ? client.email : "n/a" }}
-																</p>
-															</div>
-															<div class="sm:col-span-2">
-																<p class="text-xs font-normal text-gray-400">
-																	<font-awesome-icon :icon="['fas', 'person-circle-plus']" class="text-blue-400" />
-																	{{ client.created ? toLocaleDateTime(client.created) : "n/a" }}
-																</p>
-															</div>
-															<div class="sm:col-span-2 text-right">
-																<p class="text-xs font-normal text-gray-400">
-																	<font-awesome-icon :icon="['fas', 'clock-rotate-left']" class="text-blue-400" />
-																	{{ client.last_appointment ? toLocaleDateTime(client.last_appointment) : "no previous appointments" }}
-																</p>
-															</div>
-															<div class="sm:col-span-2 text-right">
-																<p class="text-xs font-normal text-gray-400">
-																	<font-awesome-icon :icon="['far', 'calendar-check']" class="text-blue-400" />
-																	{{ client.next_appointment ? toLocaleDateTime(client.next_appointment) : "no next appointments" }}
-																</p>
-															</div>
-														</div>
-													</span>
-												</template>
-												<font-awesome-icon :icon="['fas', clientsVisible ? 'chevron-up' : 'chevron-down']" class="text-gray-500" />
-											</button>
-											<div v-show="clientsVisible" class="p-4">
-												<QuickClientTable @selected="onSelectedClient" />
-											</div>
+												<div class="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-6 mt-2">
+													<div class="sm:col-span-2">
+														<p class="text-sm font-normal text-gray-500">
+															<font-awesome-icon :icon="['fas', 'cake-candles']" class="text-blue-500" />
+															{{ client.date_of_birth ? toLocaleDate(client.date_of_birth) : "n/a" }}
+														</p>
+													</div>
+													<div class="sm:col-span-2">
+														<p class="text-sm font-normal text-gray-500">
+															<font-awesome-icon :icon="['fas', 'phone']" class="text-blue-500" />
+															{{ client.mobile ? client.mobile : "n/a" }}
+														</p>
+													</div>
+													<div class="sm:col-span-2">
+														<p class="text-sm font-normal text-gray-500">
+															<font-awesome-icon :icon="['fas', 'at']" class="text-blue-500" />
+															{{ client.email ? client.email : "n/a" }}
+														</p>
+													</div>
+													<div class="sm:col-span-2">
+														<p class="text-xs font-normal text-gray-400">
+															<font-awesome-icon :icon="['fas', 'person-circle-plus']" class="text-blue-400" />
+															{{ client.created ? toLocaleDateTime(client.created) : "n/a" }}
+														</p>
+													</div>
+													<div class="sm:col-span-2 text-right">
+														<p class="text-xs font-normal text-gray-400">
+															<font-awesome-icon :icon="['fas', 'clock-rotate-left']" class="text-blue-400" />
+															{{ client.last_appointment ? toLocaleDateTime(client.last_appointment) : "no previous appointments" }}
+														</p>
+													</div>
+													<div class="sm:col-span-2 text-right">
+														<p class="text-xs font-normal text-gray-400">
+															<font-awesome-icon :icon="['far', 'calendar-check']" class="text-blue-400" />
+															{{ client.next_appointment ? toLocaleDateTime(client.next_appointment) : "no next appointments" }}
+														</p>
+													</div>
+												</div>
+											</span>
 										</div>
 									</div>
 
 									<div class="sm:col-span-2">
 										<label for="onsite_address" class="block text-sm/6 font-medium text-gray-900">Onsite Address</label>
 										<div class="mt-2">
-											<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-blue-300">
+											<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
 												<!-- <div class="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">billybob@domain.com</div> -->
 												<input type="text" list="onsite-address-list" name="onsite_address" id="onsite_address" v-model="form.onsite_address" :disabled="!form.is_onsite" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6 disabled:bg-gray-100 disabled:border-gray-500 disabled:text-gray-700" placeholder="e.g. Surinamestraat 00" />
 
@@ -221,8 +206,7 @@
 												<!-- Addon items grid -->
 												<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 													<div v-for="(addon, index) in filteredAddons" :key="addon.id" class="flex items-center p-3 border rounded-lg hover:bg-gray-50">
-														<input :id="`addon-checkbox-${index}`" type="checkbox" :value="addon.id" v-model="form.addons" :name="`addon-checkbox-${addon.id}`" class="w-4 h-4 text-blue-500 rounded border-gray-300" @change="handleAddonChange" />
-
+														<input :checked="form.addons.includes(addon.id)" :id="`addon-checkbox-${index}`" type="checkbox" :value="addon.id" :name="`addon-checkbox-${addon.id}`" v-model="form.addons" class="w-4 h-4 text-blue-600 rounded border-gray-300" @change="handleAddonChange" />
 														<label :for="`addon-checkbox-${index}`" class="w-full ms-2">
 															<h5 class="text-sm font-medium text-gray-900">{{ addon.name }}</h5>
 															<p class="text-xs text-gray-500">{{ addon.time_display }} • ${{ addon.price }}</p>
@@ -234,7 +218,7 @@
 										<!-- Modal footer (stays fixed) -->
 										<div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
 											<button @click="submit" class="text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Submit</button>
-											<button @click="close" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-500 focus:z-10 focus:ring-4 focus:ring-gray-100">Cancel</button>
+											<button @click="close" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-600 focus:z-10 focus:ring-4 focus:ring-gray-100">Cancel</button>
 										</div>
 									</div>
 								</div>
@@ -248,7 +232,6 @@
 </template>
 
 <script>
-import store from "@/store";
 import moment from "moment";
 
 import Form from "@/core/utils/Form";
@@ -256,18 +239,9 @@ import Form from "@/core/utils/Form";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { mapActions } from "vuex";
 
-import QuickClientTable from "../quick-tables/QuickClientTable.vue";
-
 export default {
 	components: {
 		VueDatePicker,
-		QuickClientTable,
-	},
-	props: {
-		selectedEvent: {
-			type: Object,
-			default: null,
-		},
 	},
 	data() {
 		return {
@@ -275,7 +249,8 @@ export default {
 			clientsVisible: false,
 
 			config: {},
-			// event: null,
+			event: null,
+			appointment: null,
 
 			form: new Form({
 				consistency_token: "00000000",
@@ -306,33 +281,52 @@ export default {
 		};
 	},
 	watch: {
-		selectedEvent: {
-			handler(val) {
+		event: {
+			async handler(val) {
 				if (val) {
-					this.start_time = moment(val.start).format("HH:mm");
-					// console.log("start_time:", this.start_time);
-					this.end_time = moment(val.end).format("HH:mm");
-					// console.log("end_time:", this.end_time);
+					// console.log("Event start time:", val.start, "Event end time:", val.end);
+					// Use moment.tz to ensure correct timezone handling
+					const timezone = "America/Paramaribo"; // Match Django settings
+					this.start_time = moment.tz(val.start, timezone).format("HH:mm");
+					this.end_time = moment.tz(val.end, timezone).format("HH:mm");
+
+					// console.log("Extended props:", val.extendedProps);
+					this.form.populate(val.extendedProps);
+
+					// Load client
+					this.client = await this.getClientById(val.extendedProps.client);
+					if (this.client.known_addresses) {
+						this.addresses = this.client.known_addresses;
+					}
+
+					// Load services and addons
+					const service = await this.getServiceById(val.extendedProps.service);
+					this.type = service.type.id;
+					this.addons = await this.getAddonsByType(this.type);
+
+					console.log("Loaded form:", this.form.formData());
 				}
 			},
 		},
 		start_time: {
 			handler(val) {
 				if (val) {
-					var date = moment(this.selectedEvent.start);
-					date.set({ h: moment(val, "HH:mm").get("h"), m: moment(val, "HH:mm").get("m") });
-					this.form.start = date.toISOString(true);
-					// console.log(this.form.data());
+					const timezone = "America/Paramaribo"; // Match Django settings
+					var date = moment.tz(this.event.start, timezone);
+					const time = moment.tz(val, "HH:mm", timezone);
+					date.set({ h: time.get("h"), m: time.get("m") });
+					this.form.start = date.format(); // Use format() instead of toISOString(true) to preserve timezone
+					// console.log("Updated start time:", this.form.start);
 				}
 			},
 		},
 		end_time: {
 			handler(val) {
 				if (val) {
-					var date = moment(this.selectedEvent.end);
+					var date = moment(this.event.end);
 					date.set({ h: moment(val, "HH:mm").get("h"), m: moment(val, "HH:mm").get("m") });
 					this.form.end = date.toISOString(true);
-					// console.log(this.form.data());
+					// console.log("Updated end time:", this.form.only(["end"]));
 				}
 			},
 		},
@@ -343,15 +337,17 @@ export default {
 					this.addons = await this.getAddonsByType(val);
 					this.employees = await this.getEmployeesByServiceType(val);
 					this.form.service = this.services[0] ? this.services[0]?.id : null;
-					this.form.service_price = this.services[0] ? this.services[0]?.price : null;
-					this.form.employee = this.employees[0] ? this.employees[0]?.id : null;
+
+					if (!this.form.employee) {
+						this.form.employee = this.employees[0] ? this.employees[0]?.id : null;
+					}
 				}
 			},
 		},
 	},
 	computed: {
 		appointmentDate() {
-			return this.toFullDate(this.selectedEvent?.start);
+			return this.toFullDate(this.event?.start);
 		},
 		selectedService() {
 			return this.services.find((elem) => elem.id == this.form.service);
@@ -381,14 +377,12 @@ export default {
 		},
 	},
 	methods: {
-		...mapActions("services", ["getServiceTypes", "getServicesByType", "getAddonsByType"]),
+		...mapActions("clients", ["getClientById"]),
+		...mapActions("services", ["getServiceById", "getServiceTypes", "getServicesByType", "getAddonsByType"]),
 		...mapActions("staff", ["getEmployeesByServiceType"]),
-		...mapActions("planning", ["getConfig", "loadIntervalTime", "createAppointment"]),
+		...mapActions("planning", ["getConfig", "loadIntervalTime", "updateAppointment"]),
 		toggle() {
 			this.visible = !this.visible;
-		},
-		toggleClientTable() {
-			this.clientsVisible = !this.clientsVisible;
 		},
 		calculateStartTime() {
 			const { hours, minutes } = this.selectedService.duration;
@@ -406,20 +400,17 @@ export default {
 				this.end_time = endMoment.format("HH:mm");
 			}
 		},
-		onSelectedClient(client) {
-			this.client = client;
-			this.addresses = client.known_addresses;
-			this.form.client = client.id;
-			this.toggleClientTable();
-		},
+
 		onServiceChange() {
-			console.log("Selected service:", this.selectedService);
 			this.form.service_price = this.selectedService.price;
 			this.calculateEndTime();
 		},
-		onSiteChange(onsite) {
-			if (!onsite) {
-				this.form.onsite_address = null;
+		onSiteChange() {
+			// Clear onsite_address when toggling is_onsite
+			this.form.onsite_address = null;
+			// If switching to onsite and we have a client with known addresses, pre-fill with last used address
+			if (this.form.is_onsite && this.client && this.client.known_addresses && this.client.known_addresses.length > 0) {
+				this.form.onsite_address = this.client.known_addresses[0].address;
 			}
 		},
 		calculateTotalDuration() {
@@ -451,29 +442,44 @@ export default {
 
 			this.form.total_cost = totalCost;
 		},
-		handleAddonChange(addon) {
+		handleAddonChange() {
 			// Calculate total duration and update end time
 			this.calculateTotalDuration();
 			// Calculate total cost
 			this.calculateTotalCost();
 		},
 		close() {
+			this.event = null;
+			this.appointment = null;
 			this.start_time = null;
 			this.end_time = null;
 			this.type = null;
-			this.form.reset(this.selectedEvent);
+			this.form.reset();
 			this.visible = false;
-			this.$emit("cancel");
+		},
+		getAddressId(addressText) {
+			if (!addressText || !this.addresses) return null;
+			const foundAddress = this.addresses.find((addr) => addr.address === addressText);
+			return foundAddress ? foundAddress.id : null;
 		},
 		submit() {
-			// console.log("Submitting form:", this.form.data());
-			this.createAppointment(this.form.data())
+			// Prepare form data with proper onsite_address handling
+			const formData = this.form.data();
+
+			// If is_onsite is true, convert address text to ID
+			if (formData.is_onsite && formData.onsite_address) {
+				formData.onsite_address = this.getAddressId(formData.onsite_address);
+			} else {
+				formData.onsite_address = null;
+			}
+
+			this.updateAppointment({ ...formData, id: this.event.id })
 				.then((response) => {
-					this.$emit("created", response);
+					this.$emit("updated", response);
 					this.close();
 				})
 				.catch((error) => {
-					this.$emit("error", "creating", error);
+					this.$emit("error", "updating", error);
 				});
 		},
 	},

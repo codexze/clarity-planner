@@ -96,6 +96,18 @@ class Form {
 		merge(this.initial, values);
 	}
 
+	populate(data) {
+		Object.keys(data).forEach((field) => {
+			guardAgainstReservedFieldName(field);
+
+			if (this.hasOwnProperty(field)) {
+				merge(this, { [field]: data[field] });
+			}
+		});
+
+		return this;
+	}
+
 	static create(data = {}) {
 		return new Form().withData(data);
 	}

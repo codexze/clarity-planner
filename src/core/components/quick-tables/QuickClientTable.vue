@@ -1,54 +1,67 @@
 <template>
-	<!-- <div class="relative overflow-x-auto p-4 g-white shadow-md sm:rounded-lg"> -->
 	<div class="relative overflow-y-auto p-2">
-		<div class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white">
+		<div
+			class="flex items-center justify-between flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white">
 			<table class="w-full text-sm text-left rtl:text-right">
 				<thead class="uppercase">
 					<tr class="">
 						<th class="px-4 py-2">
-							<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-								<input type="text" name="name_search" id="name_search" v-model="filters.name" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Name" />
+							<div
+								class="flex items-center rounded-md pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-gray-300">
+								<input type="text" name="name_search" id="name_search" v-model="filters.name"
+									@keyup.enter="itemProvider"
+									class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+									placeholder="Search by Name" />
 							</div>
 						</th>
 						<th class="px-4 py-2">
-							<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-								<input type="text" name="date_of_birth_search" id="date_of_birth_search" v-model="filters.date_of_birth" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Date of Birth" />
+							<div
+								class="flex items-center rounded-md pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-gray-300">
+								<input type="text" name="date_of_birth_search" id="date_of_birth_search"
+									v-model="filters.date_of_birth" @keyup.enter="itemProvider"
+									class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+									placeholder="Search by Date of Birth" />
 							</div>
 						</th>
 						<th class="px-4 py-2">
-							<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-								<input type="text" name="email_search" id="email_search" v-model="filters.email" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Emailaddress" />
+							<div
+								class="flex items-center rounded-md pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-gray-300">
+								<input type="text" name="email_search" id="email_search" v-model="filters.email"
+									@keyup.enter="itemProvider"
+									class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+									placeholder="Search by Email" />
 							</div>
 						</th>
 						<th class="px-4 py-2">
-							<div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-indigo-600 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-								<input type="text" name="mobile_search" id="mobile_search" v-model="filters.mobile" @keyup.enter="itemProvider" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="Search by Phonenumber" />
+							<div
+								class="flex items-center rounded-md pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-gray-300">
+								<input type="text" name="mobile_search" id="mobile_search" v-model="filters.mobile"
+									@keyup.enter="itemProvider"
+									class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+									placeholder="Search by Phone Number" />
 							</div>
 						</th>
-
 						<th class="px-6 py-3"></th>
 					</tr>
-					<tr class="bg-gray-200">
-						<th class="px-4 py-2 text-left" @click="sorting('surname')">
-							<div class="flex items-center gap-x-2">
-								Name
-								<ChevronUpDownIcon class="w-4 h-4" :class="sortBy == 'surname' ? 'text-gray-800' : 'text-gray-400'" />
-							</div>
+					<tr class="">
+						<th class="px-6 py-3 text-center text-md font-medium text-gray-500 uppercase tracking-wider"
+							@click="sort('surname')">
+							Name
+							<ChevronUpDownIcon class="inline w-4 h-4"
+								:class="sortBy == 'surname' ? 'text-gray-800' : 'text-gray-400'" />
 						</th>
-						<th class="px-4 py-2 text-left">
-							<div class="flex items-center gap-x-2">
-								Date of Birth
-								<!-- <ChevronUpDownIcon class="w-4 h-4" :class="sortBy == 'type' ? 'text-gray-800' : 'text-gray-400'" /> -->
-							</div>
+						<th class="px-6 py-3 text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+							Date of Birth
 						</th>
-						<th class="px-4 py-2 text-left">
-							<div class="flex items-center gap-x-2">Emailaddress</div>
+						<th class="px-6 py-3 text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+							Email
 						</th>
-						<th class="px-4 py-2 text-left">
-							<div class="flex items-center gap-x-2">Phone Number</div>
+						<th class="px-6 py-3 text-center text-md font-medium text-gray-500 uppercase tracking-wider">
+							Phone Number
 						</th>
-						<th scope="col" class="px-6 py-3">
-							<span class="sr-only">Select</span>
+						<th scope="col"
+							class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+							<span class="sr-only">Actions</span>
 						</th>
 					</tr>
 				</thead>
@@ -64,16 +77,17 @@
 					<tr v-else-if="!loading && clients.length == 0">
 						<td colspan="5" class="text-center py-4">
 							<div role="status">
-								<!-- <ArrowPathIcon class="inline w-8 h-8 text-gray-200 animate-spin fill-blue-600" /> -->
-								<span>No records found</span>
+
+								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider">No
+									records found</span>
 							</div>
 						</td>
 					</tr>
-					<tr v-else v-for="client in clients" :key="client.id" class="border-b border-b-gray-200 hover:bg-gray-100">
-						<td class="px-4 py-2 font-medium text-gray-800 whitespace-nowrap">
+					<tr v-else v-for="client in clients" :key="client.id"
+						class="border-b border-b-gray-200 hover:bg-gray-100">
+						<td class="px-4 py-2 font-medium text-gray-800 whitespace-nowrap border-r border-r-gray-200">
 							<small class="text-gray-600">{{ client.id }}</small>
 							{{ client.display }}
-
 							<template v-if="client.gender == 'MALE'">
 								<small class="text-gray-600">
 									<font-awesome-icon :icon="['fas', 'mars']" />
@@ -90,39 +104,45 @@
 								</small>
 							</template>
 						</td>
-						<td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">
+						<td class="px-4 py-2 text-center border-r border-r-gray-200">
 							{{ toLocaleDate(client.date_of_birth) }}
 						</td>
-						<td class="px-4 py-2 font-medium whitespace-nowrap" :class="client.email ? 'text-gray-900' : 'text-xs text-gray-400'">
+						<td class="px-4 py-2 text-center border-r border-r-gray-200"
+							:class="client.email ? 'text-gray-900' : 'text-xs text-gray-400'">
 							{{ client.email ? client.email : "n/a" }}
 						</td>
-						<td class="px-4 py-2 whitespace-nowrap" :class="client.mobile ? 'text-gray-900' : 'text-xs text-gray-400'">
+						<td class="px-4 py-2 text-center border-r border-r-gray-200"
+							:class="client.mobile ? 'text-gray-900' : 'text-xs text-gray-400'">
 							{{ client.mobile ? client.mobile : "n/a" }}
 						</td>
 
-						<!-- Edit Button -->
-						<td class="px-6 py-4 text-right">
-							<button @click="onSelect(client)" class="px-4 py-2 text-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50">Select</button>
+						<!-- Select Button -->
+						<td class="px-6 py-4 text-center">
+							<button @click="onSelect(client)"
+								class="px-4 py-2 text-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50">Select</button>
 						</td>
 					</tr>
 				</tbody>
 			</table>
 
-			<!-- Pagination -->
-			<div class="mt-4 flex justify-between items-center">
-				<button @click="previousPage" :disabled="isFirstPage" class="px-4 py-2 bg-gray-200 text-sm mr-2 hover:bg-gray-300 rounded-md disabled:opacity-50">Previous</button>
-				<span>Page {{ currentPage }} of {{ totalPages }}</span>
-				<button @click="nextPage" :disabled="isLastPage" class="px-4 py-2 bg-gray-200 text-sm ml-2 hover:bg-gray-300 rounded-md disabled:opacity-50">Next</button>
-			</div>
+		</div>
+		<!-- Pagination -->
+		<div class="mt-4 flex justify-between items-center">
+			<button @click="previousPage" :disabled="isFirstPage"
+				class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md disabled:opacity-50">Previous</button>
+			<span class="text-md font-medium text-gray-500 uppercase tracking-wider">Page {{ currentPage }} of {{
+				totalPages
+			}}</span>
+			<button @click="nextPage" :disabled="isLastPage"
+				class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md disabled:opacity-50">Next</button>
 		</div>
 	</div>
 </template>
 
 <script>
 import store from "@/store";
-import { mapState, mapGetters, mapActions } from "vuex";
+import { mapState, mapActions } from "vuex";
 
-import debounce from "lodash.debounce";
 import { MagnifyingGlassIcon, ArrowPathIcon, ChevronUpDownIcon } from "@heroicons/vue/24/solid";
 
 export default {
@@ -158,7 +178,7 @@ export default {
 		...mapState("clients", {
 			genders: (state) => state.genders,
 		}),
-		ordering() {
+		sorting() {
 			return this.sortOrder === "asc" ? this.sortBy : `-${this.sortBy}`; // DRF ordering syntax
 		},
 		isFirstPage() {
@@ -175,7 +195,7 @@ export default {
 			this.filterClients({
 				page: this.currentPage,
 				page_size: this.pageSize,
-				order_by: this.ordering,
+				sorting: this.sorting,
 				gender: this.selectedType,
 				...this.filters,
 			})
@@ -201,7 +221,7 @@ export default {
 			this.currentPage = this.currentPage + 1;
 			this.itemProvider();
 		},
-		sorting(column) {
+		sort(column) {
 			if (this.sortBy === column) {
 				this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc"; // Toggle order
 			} else {

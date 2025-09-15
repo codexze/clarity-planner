@@ -41,19 +41,19 @@ class CalendarSettings(Subrecord):
     event_slots = models.ManyToManyField(CalendarEventSlot)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
-    inhouse_appointment_bgcolor = ColorField(default='#f58220')
+    inhouse_appointment_bgcolor = ColorField(default='#2b7fff')
     inhouse_appointment_textcolor = ColorField(default='#ffffff')
-    onsite_appointment_bgcolor = ColorField(default='#4BF1F5')
+    onsite_appointment_bgcolor = ColorField(default='#fd9a00')
     onsite_appointment_textcolor = ColorField(default='#ffffff')
 
-    blocked_bgcolor = ColorField(default='#6C05DB')
+    blocked_bgcolor = ColorField(default='#4f39f6')
     blocked_textcolor = ColorField(default='#ffffff')
-    reminder_bgcolor = ColorField(default='#800080')
+    reminder_bgcolor = ColorField(default='#8200db')
     reminder_textcolor = ColorField(default='#ffffff')
     
-    processed_bgcolor = ColorField(default='#25408f')
+    processed_bgcolor = ColorField(default='#1c398e')
     processed_textcolor = ColorField(default='#ffffff')
-    arrived_bgcolor = ColorField(default='#93c842')
+    arrived_bgcolor = ColorField(default='#007a55')
     arrived_textcolor = ColorField(default='#ffffff')
 
     @classmethod
@@ -140,11 +140,11 @@ class Appointment(Slot, Subrecord):
     service = models.ForeignKey(Service, related_name='appointments', on_delete=models.PROTECT)
     service_price = models.DecimalField(max_digits=10, decimal_places=2) # this save the price in time, useful for reporting
     employee = models.ForeignKey(User, related_name='appointments', on_delete=models.PROTECT)
+
+    notes = models.TextField(null=True, blank=True)
     
     is_onsite = models.BooleanField(default=False) # tells us if it is a inn house or onsite booking, useful for reporting
-    # onsite_address = models.CharField(max_length=255, blank=True, null=True)
     onsite_address = models.ForeignKey(KnownAddress, related_name='appointments', on_delete=models.PROTECT, null=True, blank=True)
-
 
     arrived = models.BooleanField(default=False)
     arrived_time = models.TimeField(null=True, blank=True) # helpfull to know
@@ -202,6 +202,14 @@ class Appointment(Slot, Subrecord):
     @property
     def addons(self):
         return self.appointment_addons.all()
+    
+    @property
+    def payment_amount(self):
+        pay = self.service_price
+        if self.addons:
+            for addon in self.addons:
+                pay += addon.addon_price
+        return pay
 
     @property
     def is_past(self):

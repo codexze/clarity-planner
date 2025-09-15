@@ -5,7 +5,7 @@ from . import views
 
 router = DefaultRouter()
 
-router.register(r'namespace', views.ClientView, basename='clients')
+router.register(r'base', views.ClientView, basename='clients')
 router.register(r'genders', views.GenderView, basename='genders')
 
 urlpatterns = []

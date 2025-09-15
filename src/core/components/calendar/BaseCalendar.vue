@@ -1,5 +1,7 @@
 <template>
-	<FullCalendar ref="fullCalendar" :options="options" />
+	<div class="h-full flex flex-col">
+		<FullCalendar ref="fullCalendar" :options="options" class="flex-1 fc fc-media-screen fc-direction-ltr" />
+	</div>
 </template>
 
 <script>
@@ -37,8 +39,24 @@ export default {
 				plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, momentTimezonePlugin],
 				initialView: "timeGridWeek",
 
+				customButtons: {
+					blockmode: {
+						text: "Block mode",
+						click: (el) => {
+							var button = el.target;
+							if (button.classList.contains("active")) {
+								button.classList.remove("active");
+								this.$emit("blockmode", false);
+							} else {
+								button.classList.add("active");
+								this.$emit("blockmode", true);
+							}
+						},
+					},
+				},
+
 				headerToolbar: {
-					left: "prev,next today",
+					left: "prev,next today blockmode",
 					center: "title",
 					right: "timeGridDay,timeGridWeek,dayGridMonth",
 				},
@@ -58,11 +76,22 @@ export default {
 
 				selectable: true,
 				editable: true,
+				droppable: true,
+				dropAccept: ".fc-event",
 
 				eventClassNames: this.classNames,
 				select: this.handleDateSelect,
 				eventClick: this.handleEventClick,
+				eventDrop: this.handleEventDrop,
+				eventReceive: this.handleEventReceive,
+				eventResize: this.handleEventResize,
+				eventDidMount: this.handleEventDidMount,
 				eventSources: this.eventSources,
+				height: "100%",
+				aspectRatio: 4,
+				expandRows: true,
+				stickyHeaderDates: true,
+				stickyFooterScrollbar: true,
 			},
 		};
 	},
@@ -130,6 +159,57 @@ export default {
 		handleEventClick(clickInfo) {
 			this.$emit("event-click", clickInfo);
 		},
+		handleEventDrop(dropInfo) {
+			// console.log("Event dropped:", dropInfo);
+			this.$emit("event-drop", dropInfo);
+		},
+		handleEventReceive(receiveInfo) {
+			// console.log("Event received:", receiveInfo);
+			// this.$emit("event-receive", receiveInfo);
+			// Remove the temporary event from calendar
+			receiveInfo.event.remove();
+		},
+		handleEventResize(resizeInfo) {
+			this.$emit("event-resize", resizeInfo);
+		},
+		handleEventDidMount(info) {
+			this.$emit("event-did-mount", info);
+		},
+		handleDrop(dropInfo) {
+			// Return false to indicate the event should be discarded
+			this.$emit("drop", dropInfo);
+			return false;
+		},
 	},
 };
 </script>
+
+<style>
+button.fc-button.fc-button-primary:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	background-color: oklch(54.6% 0.245 262.881);
+	border-color: oklch(54.6% 0.245 262.881);
+	color: white;
+}
+
+button.fc-button.fc-button-primary:hover,
+button.fc-button.fc-button-primary:focus,
+button.fc-button.fc-button-primary:active {
+	background-color: oklch(62.3% 0.214 259.815);
+	border-color: oklch(62.3% 0.214 259.815);
+	color: white;
+}
+
+button.fc-button.fc-button-primary {
+	background-color: oklch(54.6% 0.245 262.881);
+	border-color: oklch(54.6% 0.245 262.881);
+	color: white;
+}
+
+button.fc-button.fc-button-active {
+	background-color: oklch(48.8% 0.243 264.376) !important;
+	border-color: oklch(48.8% 0.243 264.376) !important;
+	color: white;
+}
+</style>

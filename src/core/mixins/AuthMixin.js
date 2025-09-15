@@ -17,7 +17,7 @@ export default {
 	},
 	methods: {
 		formatErrors(errorResponse) {
-			if (errorResponse.detail) {
+			if (errorResponse?.detail) {
 				this.toastError(errorResponse.detail);
 				return {};
 			} else {

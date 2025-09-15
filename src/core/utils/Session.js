@@ -55,7 +55,7 @@ instance.interceptors.response.use(
 							// Update the token in the store
 							await store.dispatch("auth/refresh_token", response.data.accessToken);
 
-							// Refresh the page instead of retrying the request
+							//o Refresh the page instead of retrying the request
 							window.location.reload();
 							return new Promise(() => {});
 						}

@@ -42,6 +42,7 @@ const actions = {
 			.finally(() => {});
 	},
 	refresh_token({ commit }) {
+		console.log("Refreshing token...");
 		return session
 			.post("api/authorize/token/refresh/", { refresh: state.refreshToken })
 			.then((response) => {

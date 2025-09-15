@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Gender, Client, KnownAddress
+
+from apps.planning.models import Appointment
+from .models import Client, KnownAddress
 
 class GenderSerializer(serializers.Serializer):
     key = serializers.CharField()
@@ -8,7 +10,7 @@ class GenderSerializer(serializers.Serializer):
 class KnownAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = KnownAddress
-        fields = '__all__'
+        fields = ('id', 'address')
     
 class ClientSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
@@ -50,7 +52,7 @@ class ClientSerializer(serializers.ModelSerializer):
     
     def get_last_used_address(self, obj):
         """Fetches the property from the model"""
-        return obj.last_used_address
+        return KnownAddressSerializer(obj.last_used_address).data
     
     def get_known_addresses(self, obj):
         """Fetches the property from the model"""
@@ -60,3 +62,54 @@ class ClientSerializer(serializers.ModelSerializer):
         """Fetches the property from the model"""
         return KnownAddressSerializer(obj.active_known_addresses, many=True).data
     
+class AppointmentSerializer(serializers.ModelSerializer):  
+    appointment_date = serializers.SerializerMethodField()
+    start_time = serializers.SerializerMethodField()
+    end_time = serializers.SerializerMethodField()
+    client_name = serializers.SerializerMethodField()
+    employee_name = serializers.SerializerMethodField()
+    service_name = serializers.SerializerMethodField()
+    addons = serializers.SerializerMethodField()
+    payment_amount = serializers.SerializerMethodField()
+    is_future = serializers.SerializerMethodField()
+    is_past = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Appointment
+        fields = '__all__'
+
+    def get_appointment_date(self, obj):
+        """Returns the appointment date in YYYY-MM-DD format"""
+        return obj.start.astimezone().date().isoformat()
+    
+    def get_start_time(self, obj):
+        """Returns the start time in HH:mm format"""
+        return obj.start.astimezone().strftime("%H:%M")
+    
+    def get_end_time(self, obj):
+        """Returns the end time in HH:mm format"""
+        return obj.end.astimezone().strftime("%H:%M")
+    
+    def get_client_name(self, obj):
+        """Returns the client's full name"""
+        return obj.client.display if obj.client else None
+    
+    def get_employee_name(self, obj):
+        """Returns the employee's full name"""
+        return obj.employee.name if obj.employee else None
+
+    def get_service_name(self, obj):
+        """Returns the service name"""
+        return  obj.service.display if obj.service else None
+    
+    def get_addons(self, obj):
+        return [addon.addon.name for addon in obj.addons] if obj.addons else []
+    
+    def get_payment_amount(self, obj):
+        return obj.payment_amount
+    
+    def get_is_future(self, obj):
+        return obj.is_future
+
+    def get_is_past(self, obj):
+        return obj.is_past

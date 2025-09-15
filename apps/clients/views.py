@@ -1,14 +1,15 @@
 import datetime
 from rest_framework import permissions, pagination, views, viewsets, response, status
 from rest_framework.decorators import action
-from rest_framework.generics import ListAPIView
 from django_filters import rest_framework as filters
 from django.shortcuts import get_object_or_404
-from django.http import Http404
 from django.db.models import Q
 
+from apps.planning.views import AppointmentFilter, AppointmentPagination
+from apps.planning.models import Appointment
+
 from .models import Gender, Client
-from .serializers import ClientSerializer
+from .serializers import ClientSerializer, AppointmentSerializer
 
 class GenderView(viewsets.ViewSet):
     def list(self, request):
@@ -26,7 +27,7 @@ class ClientFilter(filters.FilterSet):
     email = filters.CharFilter(field_name='email', lookup_expr='icontains')
     mobile = filters.CharFilter(field_name='mobile', lookup_expr='startswith')
     gender = filters.CharFilter(field_name='gender', lookup_expr='iexact')
-    order_by = filters.CharFilter(method='order_by', label="Order By")
+    sorting = filters.CharFilter(method='do_sorting', label="Order By")
 
     class Meta:
         model = Client
@@ -52,7 +53,7 @@ class ClientFilter(filters.FilterSet):
         except:
             return queryset
 
-    def order_by(self, queryset, name, value):
+    def do_sorting(self, queryset, name, value):
         return queryset.filter().order_by(value)
 
 
@@ -81,6 +82,20 @@ class ClientView(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
     
+    @action(methods=['get'], detail=True)
+    def appointments(self, request, pk=None):
+        client = get_object_or_404(Client, pk=pk)
+        appointments = Appointment.objects.filter(client=client)
+        
+        # Apply filtering and pagination
+        filtered_appointments = AppointmentFilter(request.GET, queryset=appointments).qs
+        paginator = AppointmentPagination()
+        paginated_appointments = paginator.paginate_queryset(filtered_appointments, request)
+        
+        serializer = AppointmentSerializer(paginated_appointments, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():

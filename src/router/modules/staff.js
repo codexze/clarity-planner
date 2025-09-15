@@ -11,12 +11,18 @@ const routes = [
 			{
 				path: "",
 				component: Staff,
-				meta: { requiresAuth: true },
+				meta: {
+					title: "Staff",
+					requiresAuth: true,
+				},
 			},
 			{
 				path: ":employeeId/view",
 				component: EmployeeDetailsView,
-				meta: { requiresAuth: true },
+				meta: {
+					title: "Employee Details",
+					requiresAuth: true,
+				},
 			},
 		],
 	},

@@ -1,0 +1,5 @@
+button.fc-blockmode-button.fc-button.fc-button-primary.active {
+	background-color: #6c05db;
+	color: var(--color-white);
+	border-color: #6c05db;
+}

@@ -8,6 +8,8 @@ const state = {
 	},
 	employee: {},
 	employees: [],
+
+	appointment: null,
 };
 
 const getters = {};
@@ -21,6 +23,9 @@ const mutations = {
 	},
 	SET_EMPLOYEES(state, employees) {
 		state.employees = employees;
+	},
+	SET_APPOINTMENT(state, appointment) {
+		state.appointment = appointment;
 	},
 };
 
@@ -54,6 +59,43 @@ const actions = {
 		const employees = await session.get(`api/planning/employees/limited/`);
 		commit("SET_EMPLOYEES", employees.data);
 		return employees.data;
+	},
+	async filterAppointments({ commit }, params) {
+		const appointments = await session.get("api/planning/appointments/filter/", { params: params });
+		return appointments.data;
+	},
+	async getAppointmentById({ commit }, id) {
+		const appointment = await session.get(`api/planning/appointments/${id}/`);
+		commit("SET_APPOINTMENT", appointment.data);
+		return appointment.data;
+	},
+	async filterBlocked({ commit }, params) {
+		const blocked = await session.get("api/planning/blocked/filter/", { params: params });
+		return blocked.data;
+	},
+	createAppointment({ commit }, data) {
+		return session
+			.post(`api/planning/appointments/`, data)
+			.then((response) => {
+				return response.data;
+			})
+			.finally(() => {});
+	},
+	rescheduleAppointment({ commit }, data) {
+		return session
+			.put(`api/planning/appointments/${data.id}/reschedule/`, data)
+			.then((response) => {
+				return response.data;
+			})
+			.finally(() => {});
+	},
+	updateAppointment({ commit }, data) {
+		return session
+			.put(`api/planning/appointments/${data.id}/`, data)
+			.then((response) => {
+				return response.data;
+			})
+			.finally(() => {});
 	},
 };
 

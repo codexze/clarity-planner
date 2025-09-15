@@ -20,19 +20,19 @@ export default {
 			return moment(date).locale("en").format("ddd DD MMMM YYYY");
 		},
 		toLocaleDate(date) {
-			return moment(date).locale("en").format("DD MMM YYYY");
+			return moment.tz(date, "America/Paramaribo").locale("en").format("DD MMM YYYY");
 		},
 		toLocaleDateTime(datetime) {
-			return moment(datetime).locale("en").format("DD MMM YYYY HH:mm");
+			return moment.tz(datetime, "America/Paramaribo").locale("en").format("DD MMM YYYY HH:mm");
 		},
 		toLocaleTimeFromDateTime(datetime) {
-			return moment(datetime).locale("en").format("HH:mm");
+			return moment.tz(datetime, "America/Paramaribo").locale("en").format("HH:mm");
 		},
 		toLocaleTime(time) {
-			return moment(time, "HH:mm:ss").locale("en").format("HH:mm");
+			return moment.tz(time, "HH:mm:ss", "America/Paramaribo").locale("en").format("HH:mm");
 		},
 		dateToLocaleTime(date) {
-			return moment(date).locale("en").format("HH:mm");
+			return moment.tz(date, "America/Paramaribo").locale("en").format("HH:mm");
 		},
 		toWeekday(date) {
 			return moment(date).locale("en").format("dddd");

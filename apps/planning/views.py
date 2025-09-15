@@ -1,12 +1,14 @@
 import datetime
-from rest_framework import permissions, pagination, views, viewsets, response, status
+from rest_framework import permissions, pagination, viewsets, response, status
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
-from django.shortcuts import get_object_or_404
-from django.http import Http404
 from django.db.models import Q
+from django.db import transaction
 
-from .models import Appointment, Blocked
+from apps.clients.models import KnownAddress
+from apps.inhouse.models import Addon
+
+from .models import Appointment, Blocked, AppointmentAddon
 from .serializers import AppointmentSerializer, BlockedSerializer
 
 
@@ -17,10 +19,10 @@ class AppointmentPagination(pagination.PageNumberPagination):
     max_page_size = 100  # Prevent very large page sizes
 
 class AppointmentFilter(filters.FilterSet):
-    search = filters.CharFilter(method='filter_search', label="Search")
-    type = filters.CharFilter(field_name='type', lookup_expr='iexact')
-    status = filters.BooleanFilter(field_name='is_active', lookup_expr='exact')
-    order_by = filters.CharFilter(method='filter_order_by', label="Order By")
+    appointment_date = filters.CharFilter(method='filter_appointment_date', label="Search Appointment Date")
+    client__name = filters.CharFilter(method='filter_client', label="Search Client Name")
+    service__name = filters.CharFilter(method='filter_service', label="Search Service Name")
+    sorting = filters.CharFilter(method='do_sorting', label="Order By")
 
     class Meta:
         model = Appointment
@@ -30,11 +32,27 @@ class AppointmentFilter(filters.FilterSet):
             # 'is_active': ['exact'],  # Active services only
         }
 
-    def filter_search(self, queryset, name, value):
-        # return queryset.filter(Q(name__icontains=value) | Q(description__icontains=value))
-        return queryset.filter()
+    def filter_appointment_date(self, queryset, name, value):
+        try:
+            # Try common date formats
+            for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y', '%d-%m-%Y', '%d%m%Y']:
+                try:
+                    date = datetime.datetime.strptime(value, fmt).date()
+                    return queryset.filter(start__date=date)
+                except ValueError:
+                    continue
+            return queryset
+        except:
+            return queryset
 
-    def filter_order_by(self, queryset, name, value):
+    def filter_client(self, queryset, name, value):
+        return queryset.filter(Q(client__first_name__icontains=value) | Q(client__surname__icontains=value))
+
+
+    def filter_service(self, queryset, name, value):
+        return queryset.filter(Q(service__name__icontains=value))
+
+    def do_sorting(self, queryset, name, value):
         return queryset.filter().order_by(value)
 
 
@@ -61,17 +79,69 @@ class AppointmentView(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
     
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        data = request.data.copy()
+        
+        if data.get('is_onsite') and data.get('onsite_address'):
+            address = data.pop('onsite_address')
+            known_address, _ = KnownAddress.objects.get_or_create(address=address, client_id=data.get('client'))
+            data['onsite_address'] = known_address.id
+
+
+        serializer = self.get_serializer(data=data)
         if serializer.is_valid():
             instance = serializer.save()
-            instance.set_record(request.user)
+            instance.set_record(request.user, False)
+
+            addons = data.pop('addons')
+            if addons:
+                for addon_id in addons:
+                    addon = Addon.objects.get(id=addon_id)
+                    AppointmentAddon.objects.create(appointment=instance, addon=addon, addon_price=addon.price)
+
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @transaction.atomic
+    @action(methods=['put'], detail=True, url_path='reschedule')
+    def reschedule(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data.copy()
+
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        if serializer.is_valid():
+            self.perform_update(serializer)
+            instance.refresh_from_db()
+            instance.set_record(request.user)
+            return response.Response(serializer.data, status=status.HTTP_200_OK)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=False)
+        data = request.data.copy()
+
+        # Update onsite_address if provided
+        if data.get('is_onsite') and data.get('onsite_address'):
+            address = data.pop('onsite_address')
+            known_address, _ = KnownAddress.objects.get_or_create(address=address, client_id=data.get('client'))
+            data['onsite_address'] = known_address.id
+
+        # Update addons if provided and only if changed
+        addons = data.pop('addons', None)
+        if addons is not None:
+            # Get current addon IDs for the appointment
+            current_addon_ids = set(AppointmentAddon.objects.filter(appointment=instance).values_list('addon_id', flat=True))
+            new_addon_ids = set(addons)
+            if current_addon_ids != set(map(int, new_addon_ids)):
+            # Remove existing addons
+                AppointmentAddon.objects.filter(appointment=instance).delete()
+                # Add new addons
+                for addon_id in new_addon_ids:
+                    addon = Addon.objects.get(id=addon_id)
+                    AppointmentAddon.objects.create(appointment=instance, addon=addon, addon_price=addon.price)
+
+        serializer = self.get_serializer(instance, data=data, partial=False)
         if serializer.is_valid():
             self.perform_update(serializer)
             instance.refresh_from_db()

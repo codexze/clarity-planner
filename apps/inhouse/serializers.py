@@ -74,10 +74,6 @@ class StaffSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['services'] = [
-            service.service_type.id 
-            for service in instance.services.filter(is_active=True)
-        ]
         return ret
 
     def create(self, validated_data):

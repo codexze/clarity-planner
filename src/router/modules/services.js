@@ -12,17 +12,26 @@ const routes = [
 			{
 				path: "",
 				component: Services,
-				meta: { requiresAuth: true },
+				meta: {
+					title: "Services",
+					requiresAuth: true,
+				},
 			},
 			{
 				path: ":serviceId/view",
 				component: ServiceDetails,
-				meta: { requiresAuth: true },
+				meta: {
+					title: "Service Details",
+					requiresAuth: true,
+				},
 			},
 			{
 				path: "new",
 				component: NewServiceView,
-				meta: { requiresAuth: true },
+				meta: {
+					title: "New Service",
+					requiresAuth: true,
+				},
 			},
 		],
 	},

@@ -28,8 +28,8 @@ def start(cmd):
     else:
         cmd.stdout.write(cmd.style.WARNING('User: manager already exists'), ending='\n')
     
-    cmd.stdout.write(cmd.style.SUCCESS( 'Creating user: employee_a'), ending='\n')
-    user, created = User.objects.get_or_create(username='employee_a')
+    cmd.stdout.write(cmd.style.SUCCESS( 'Creating user: employeea'), ending='\n')
+    user, created = User.objects.get_or_create(username='employeea')
     if created:
         user.first_name = "Emplyee A"
         user.last_name = "Clarity"
@@ -38,10 +38,10 @@ def start(cmd):
         user.groups.add(employee)
         user.save()
     else:
-        cmd.stdout.write(cmd.style.WARNING('User: employee_a already exists'), ending='\n')
-    
-    cmd.stdout.write(cmd.style.SUCCESS( 'Creating user: employee_b'), ending='\n')
-    user, created = User.objects.get_or_create(username='employee_b')
+        cmd.stdout.write(cmd.style.WARNING('User: employeea already exists'), ending='\n')
+
+    cmd.stdout.write(cmd.style.SUCCESS( 'Creating user: employeeb'), ending='\n')
+    user, created = User.objects.get_or_create(username='employeeb')
     if created:
         user.first_name = "Employee B"
         user.last_name = "Clarity"
@@ -50,7 +50,7 @@ def start(cmd):
         user.groups.add(employee)
         user.save()
     else:
-        cmd.stdout.write(cmd.style.WARNING('User: employee_b already exists'), ending='\n')
+        cmd.stdout.write(cmd.style.WARNING('User: employeeb already exists'), ending='\n')
 
     ##########################################################################################################
     cmd.stdout.write(cmd.style.SUCCESS('SETUP CLARITY DATA'), ending='\n')
