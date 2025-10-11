@@ -8,12 +8,12 @@ from django.db import transaction
 from apps.clients.models import KnownAddress
 from apps.inhouse.models import Addon
 
-from .models import Appointment, Blocked, AppointmentAddon
-from .serializers import AppointmentSerializer, BlockedSerializer
+from .models import Appointment, Blocked, Reminder,AppointmentAddon
+from .serializers import AppointmentSerializer, BlockedSerializer, ReminderSerializer
 
 
-        
-class AppointmentPagination(pagination.PageNumberPagination):
+
+class Pagination(pagination.PageNumberPagination):
     page_size = 10  # Number of items per page
     page_size_query_param = 'page_size'  # Allow users to set custom page size
     max_page_size = 100  # Prevent very large page sizes
@@ -22,15 +22,11 @@ class AppointmentFilter(filters.FilterSet):
     appointment_date = filters.CharFilter(method='filter_appointment_date', label="Search Appointment Date")
     client__name = filters.CharFilter(method='filter_client', label="Search Client Name")
     service__name = filters.CharFilter(method='filter_service', label="Search Service Name")
-    sorting = filters.CharFilter(method='do_sorting', label="Order By")
+    ordering = filters.CharFilter(method='order', label="Order By")
 
     class Meta:
         model = Appointment
-        fields = {
-            # 'type': ['exact'],  # Filter by exact match
-            # 'price': ['lt', 'gt', 'exact'],  # Less than, greater than, exact price
-            # 'is_active': ['exact'],  # Active services only
-        }
+        fields = { }
 
     def filter_appointment_date(self, queryset, name, value):
         try:
@@ -51,8 +47,17 @@ class AppointmentFilter(filters.FilterSet):
 
     def filter_service(self, queryset, name, value):
         return queryset.filter(Q(service__name__icontains=value))
-
-    def do_sorting(self, queryset, name, value):
+    
+    def order(self, queryset, name, value):
+        if 'client__name' in value:
+            if value.startswith('-'):
+                return queryset.filter().order_by('client__first_name', 'client__surname').reverse()
+            return queryset.filter().order_by('client__first_name', 'client__surname')
+        
+        if 'appointment_date' in value:
+            if value.startswith('-'):
+                return queryset.filter().order_by('start').reverse()
+            return queryset.filter().order_by('start')
         return queryset.filter().order_by(value)
 
 
@@ -61,7 +66,7 @@ class AppointmentView(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = AppointmentFilter
-    pagination_class = AppointmentPagination
+    pagination_class = Pagination
 
     def get_queryset(self):
         queryset = Appointment.objects.all()
@@ -87,8 +92,7 @@ class AppointmentView(viewsets.ModelViewSet):
             address = data.pop('onsite_address')
             known_address, _ = KnownAddress.objects.get_or_create(address=address, client_id=data.get('client'))
             data['onsite_address'] = known_address.id
-
-
+        
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
             instance = serializer.save()
@@ -120,7 +124,6 @@ class AppointmentView(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         data = request.data.copy()
-
         # Update onsite_address if provided
         if data.get('is_onsite') and data.get('onsite_address'):
             address = data.pop('onsite_address')
@@ -158,6 +161,9 @@ class BlockedView(viewsets.ModelViewSet):
         return queryset
 
     def create(self, request, *args, **kwargs):
+        data = request.data
+        data["employee"] = request.user.id
+
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
@@ -165,6 +171,20 @@ class BlockedView(viewsets.ModelViewSet):
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @transaction.atomic
+    @action(methods=['put'], detail=True, url_path='reschedule')
+    def reschedule(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data.copy()
+
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        if serializer.is_valid():
+            self.perform_update(serializer)
+            instance.refresh_from_db()
+            instance.set_record(request.user)
+            return response.Response(serializer.data, status=status.HTTP_200_OK)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=False)
@@ -173,4 +193,31 @@ class BlockedView(viewsets.ModelViewSet):
             instance.refresh_from_db()
             instance.set_record(request.user)
             return response.Response(serializer.data, status=status.HTTP_200_OK)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ReminderView(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ReminderSerializer
+
+    def get_queryset(self):
+        queryset = Reminder.objects.all()
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+
+        date = data.pop("appointment_date", datetime.datetime.now().date().isoformat())
+        data["start"] = date
+        data["end"] = date
+
+        if data.get('global_reminder'):
+            data['employee'] = None
+        else:
+            data['employee'] = request.user.id
+
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            instance = serializer.save()
+            instance.set_record(request.user)
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

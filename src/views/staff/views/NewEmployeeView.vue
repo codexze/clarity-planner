@@ -8,26 +8,42 @@
             <font-awesome-icon :icon="['fas', 'user-plus']" class="text-white text-lg" />
           </div>
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">Create New Client</h1>
-            <p class="text-sm text-gray-600">Add a new client to manage relationships and appointments</p>
+            <h1 class="text-2xl font-bold text-gray-900">Create New Employee</h1>
+            <p class="text-sm text-gray-600">Add a new employee to manage staff and service assignments</p>
           </div>
         </div>
       </div>
 
-      <!-- Client Form Card -->
+      <!-- Employee Form Card -->
       <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-            <font-awesome-icon :icon="['fas', 'user']" class="mr-3 text-blue-600" />
-            Client Information
+            <font-awesome-icon :icon="['fas', 'user-tie']" class="mr-3 text-blue-600" />
+            Employee Information
           </h3>
-          <p class="mt-1 text-sm text-gray-600">Enter the personal and contact details for the new client</p>
+          <p class="mt-1 text-sm text-gray-600">Enter the personal and contact details for the new employee</p>
         </div>
 
         <div class="p-6">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Left Column -->
             <div class="space-y-6">
+              <!-- Username -->
+              <div class="space-y-2">
+                <label for="username" class="flex items-center text-sm font-medium text-gray-900">
+                  <font-awesome-icon :icon="['fas', 'user-tag']" class="mr-2 text-gray-400" />
+                  Username
+                  <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="relative">
+                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <font-awesome-icon :icon="['fas', 'user-tag']" class="text-gray-400" />
+                  </div>
+                  <input type="text" name="username" id="username" v-model="form.username" required class="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm placeholder-gray-500 hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" placeholder="e.g. johnsmith" />
+                </div>
+                <p class="text-xs text-gray-500">Must be unique and cannot be changed later</p>
+              </div>
+
               <!-- First Name -->
               <div class="space-y-2">
                 <label for="first_name" class="flex items-center text-sm font-medium text-gray-900">
@@ -45,33 +61,16 @@
 
               <!-- Surname -->
               <div class="space-y-2">
-                <label for="surname" class="flex items-center text-sm font-medium text-gray-900">
-                  <font-awesome-icon :icon="['fas', 'user']" class="mr-2 text-gray-400" />
+                <label for="last_name" class="flex items-center text-sm font-medium text-gray-900">
+                  <font-awesome-icon :icon="['fas', 'user-tag']" class="mr-2 text-gray-400" />
                   Surname
                   <span class="text-red-500 ml-1">*</span>
                 </label>
                 <div class="relative">
                   <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <font-awesome-icon :icon="['fas', 'user']" class="text-gray-400" />
+                    <font-awesome-icon :icon="['fas', 'user-tag']" class="text-gray-400" />
                   </div>
-                  <input type="text" name="surname" id="surname" v-model="form.surname" required class="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm placeholder-gray-500 hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" placeholder="Enter surname" />
-                </div>
-              </div>
-
-              <!-- Gender -->
-              <div class="space-y-2">
-                <label for="genders" class="flex items-center text-sm font-medium text-gray-900">
-                  <font-awesome-icon :icon="['fas', 'venus-mars']" class="mr-2 text-gray-400" />
-                  Gender
-                  <span class="text-red-500 ml-1">*</span>
-                </label>
-                <div class="relative">
-                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <font-awesome-icon :icon="['fas', 'venus-mars']" class="text-gray-400" />
-                  </div>
-                  <select id="genders" v-model="form.gender" class="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
-                    <option v-for="gender in genders" :key="gender.value" :value="gender.value">{{ gender.label }}</option>
-                  </select>
+                  <input type="text" name="last_name" id="last_name" v-model="form.last_name" required class="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm placeholder-gray-500 hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" placeholder="Enter surname" />
                 </div>
               </div>
 
@@ -98,12 +97,13 @@
                 <label for="email" class="flex items-center text-sm font-medium text-gray-900">
                   <font-awesome-icon :icon="['fas', 'envelope']" class="mr-2 text-gray-400" />
                   Email
+                  <span class="text-red-500 ml-1">*</span>
                 </label>
                 <div class="relative">
                   <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                     <font-awesome-icon :icon="['fas', 'envelope']" class="text-gray-400" />
                   </div>
-                  <input type="email" name="email" id="email" v-model="form.email" class="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm placeholder-gray-500 hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" placeholder="name@example.com" />
+                  <input type="email" name="email" id="email" v-model="form.email" required class="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm placeholder-gray-500 hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" placeholder="employee@company.com" />
                 </div>
               </div>
 
@@ -112,28 +112,28 @@
                 <label for="mobile" class="flex items-center text-sm font-medium text-gray-900">
                   <font-awesome-icon :icon="['fas', 'phone']" class="mr-2 text-gray-400" />
                   Phone Number
+                  <span class="text-red-500 ml-1">*</span>
                 </label>
                 <div class="relative flex rounded-lg shadow-sm">
                   <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">+</span>
-                  <input type="text" name="mobile" id="mobile" v-mask="['### ###-####', '## # ####-####', '# (###) ###-####']" v-model="form.mobile" class="block w-full rounded-none rounded-r-lg border border-gray-300 py-3 pl-3 pr-3 text-sm text-gray-900 hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" placeholder="597 000-0000" />
+                  <input type="text" name="mobile" id="mobile" v-mask="['### ###-####', '## # ####-####', '# (###) ###-####']" v-model="form.mobile" required class="block w-full rounded-none rounded-r-lg border border-gray-300 py-3 pl-3 pr-3 text-sm text-gray-900 hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" placeholder="597 000-0000" />
                 </div>
               </div>
 
-              <!-- Company -->
+              <!-- Initial Password -->
               <div class="space-y-2">
-                <label for="company" class="flex items-center text-sm font-medium text-gray-900">
-                  <font-awesome-icon :icon="['fas', 'building']" class="mr-2 text-gray-400" />
-                  Company
+                <label for="password" class="flex items-center text-sm font-medium text-gray-900">
+                  <font-awesome-icon :icon="['fas', 'lock']" class="mr-2 text-gray-400" />
+                  Initial Password
+                  <span class="text-red-500 ml-1">*</span>
                 </label>
                 <div class="relative">
                   <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <font-awesome-icon :icon="['fas', 'building']" class="text-gray-400" />
+                    <font-awesome-icon :icon="['fas', 'lock']" class="text-gray-400" />
                   </div>
-                  <select id="company" v-model="form.company" class="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
-                    <option value="">Select a company (optional)</option>
-                    <option v-for="company in companies" :key="company.id" :value="company.id">{{ company.name }}</option>
-                  </select>
+                  <input type="password" name="password" id="password" v-model="form.password" required class="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm placeholder-gray-500 hover:border-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200" placeholder="Enter initial password" />
                 </div>
+                <p class="text-xs text-gray-500">Employee can change this after first login</p>
               </div>
 
               <!-- Active Status -->
@@ -145,10 +145,10 @@
                     </div>
                     <div>
                       <p class="font-medium text-gray-900">
-                        {{ form.is_active ? 'Active Client' : 'Inactive Client' }}
+                        {{ form.is_active ? 'Active Employee' : 'Inactive Employee' }}
                       </p>
                       <p class="text-sm text-gray-500">
-                        {{ form.is_active ? 'Client will be active and available for appointments' : 'Client will be inactive and hidden from listings' }}
+                        {{ form.is_active ? 'Employee will be active and able to log in' : 'Employee will be inactive and unable to log in' }}
                       </p>
                     </div>
                   </div>
@@ -174,9 +174,9 @@
                 <font-awesome-icon :icon="['fas', 'times']" class="mr-2" />
                 Cancel
               </button>
-              <button @click="handleSubmit" :disabled="!form.first_name || !form.surname" class="inline-flex items-center px-8 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 border border-transparent rounded-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-lg">
-                <font-awesome-icon :icon="['fas', 'user-plus']" class="mr-2" />
-                Create Client
+              <button @click="handleSubmit" :disabled="!form.username || !form.first_name || !form.last_name || !form.email || !form.mobile || !form.password" class="inline-flex items-center px-8 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 border border-transparent rounded-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-lg">
+                <font-awesome-icon :icon="['fas', 'plus']" class="mr-2" />
+                Create Employee
               </button>
             </div>
           </div>
@@ -189,67 +189,49 @@
 <script>
 import store from '@/store';
 import Form from '@/core/utils/Form';
-
 import VueDatePicker from '@vuepic/vue-datepicker';
-import { ChevronDownIcon } from '@heroicons/vue/24/solid';
+import { mapActions } from 'vuex';
 
-import { mapState, mapGetters, mapActions } from 'vuex';
 export default {
   components: {
     VueDatePicker,
-    ChevronDownIcon,
   },
   data() {
     return {
       form: new Form({
         consistency_token: '00000000',
+        username: null,
         first_name: null,
-        surname: null,
+        last_name: null,
         date_of_birth: null,
-        gender: 'UNKNOWN',
         email: null,
         mobile: null,
-        company: null,
+        password: null,
         is_active: true,
       }),
     };
   },
-  computed: {
-    ...mapState('clients', {
-      genders: (state) => state.genders,
-    }),
-    ...mapState('companies', {
-      companies: (state) => state.companies,
-    }),
-  },
   methods: {
-    ...mapActions('clients', ['createClient']),
+    ...mapActions('staff', ['createEmployee']),
     handleSubmit() {
-      if (!this.form.first_name || !this.form.surname) {
-        this.toastError('First name and surname are required');
+      if (!this.form.username || !this.form.first_name || !this.form.last_name || !this.form.email || !this.form.mobile || !this.form.password) {
+        this.toastError('Please fill in all required fields');
         return;
       }
 
-      this.createClient(this.form.formData())
+      this.createEmployee(this.form.formData())
         .then((response) => {
-          this.toastSuccess(`Client, ${response.name}, was created successfully!`);
-          this.$router.push({ path: `/clients/${response.id}/view` });
+          this.toastSuccess(`Employee, ${response.first_name} ${response.last_name}, was created successfully!`);
+          this.$router.push({ path: `/staff/${response.username}/view` });
         })
         .catch((error) => {
-          this.toastError('Failed to create client');
-          console.error('Create client error:', error);
+          this.toastError('Failed to create employee');
+          console.error('Create employee error:', error);
         });
     },
     cancel() {
       this.$router.go(-1);
     },
-  },
-  async beforeRouteEnter(to, from, next) {
-    const genders = await store.dispatch('clients/getGenders');
-    await store.dispatch('companies/getCompanies');
-
-    // to.meta.label = `${client.name}`;
-    return next();
   },
 };
 </script>

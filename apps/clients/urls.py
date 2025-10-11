@@ -6,7 +6,10 @@ from . import views
 router = DefaultRouter()
 
 router.register(r'base', views.ClientView, basename='clients')
+router.register(r'reminder-reason', views.ReminderReasonView, basename='reminder-reason')
 router.register(r'genders', views.GenderView, basename='genders')
+router.register(r'companies', views.CompanyView, basename='companies')
+router.register(r'known-addresses', views.KnownAddressView, basename='known-addresses')
 
 urlpatterns = []
 

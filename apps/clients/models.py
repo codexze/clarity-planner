@@ -5,10 +5,22 @@ from apps.core.models import *
 
 class Gender(models.TextChoices):
     male = "MALE"
-    female = "FEMALS"
+    female = "FEMALE"
     unknown = "UNKNOWN"
 
+class Company(Subrecord):
+    name = models.CharField(max_length=255)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True, null=True)
+    phone = models.CharField(max_length=50, blank=True, null=True)
+    website = models.CharField(max_length=255, blank=True, null=True)
+    is_active = models.BooleanField(default=True) #switched off make company inactive and not in default filter
+
+    def __str__(self):
+        return self.name
+
 class Client(Subrecord):
+    company = models.ForeignKey(Company, blank=True, null=True, related_name='clients', on_delete=models.CASCADE)
     first_name = models.CharField(max_length=255)
     surname = models.CharField(max_length=255)
     date_of_birth = models.DateField()

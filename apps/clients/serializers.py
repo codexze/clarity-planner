@@ -1,16 +1,33 @@
+import datetime
 from rest_framework import serializers
 
-from apps.planning.models import Appointment
-from .models import Client, KnownAddress
+from apps.planning.models import Appointment, Reminder
+from .models import Client, KnownAddress, Company
 
 class GenderSerializer(serializers.Serializer):
     key = serializers.CharField()
     value = serializers.CharField()
 
 class KnownAddressSerializer(serializers.ModelSerializer):
+    appointment = serializers.SerializerMethodField()
     class Meta:
         model = KnownAddress
-        fields = ('id', 'address')
+        fields = ( 'id', 'address', 'is_active', 'appointment')
+
+    def get_appointment(self, obj):
+        """Fetches the most recent appointment associated with this address"""
+        last_onsite_appointment = Appointment.objects.filter(client=obj.client, is_onsite=True, onsite_address=obj.id).order_by('-start').first()
+        if last_onsite_appointment:
+            return {"appointment_date": last_onsite_appointment.start.astimezone().date().isoformat(), "is_past": last_onsite_appointment.is_past, "is_future": last_onsite_appointment.is_future}
+        next_onsite_appointment = Appointment.objects.filter(client=obj.client, is_onsite=True, onsite_address=obj.id, start__gte=datetime.datetime.now()).order_by('start').first()
+        if next_onsite_appointment:
+            return {"appointment_date": next_onsite_appointment.start.astimezone().date().isoformat(), "is_past": next_onsite_appointment.is_past, "is_future": next_onsite_appointment.is_future}
+        return None
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ('id', 'name', 'address', 'email', 'phone', 'website', 'is_active')
     
 class ClientSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
@@ -21,10 +38,17 @@ class ClientSerializer(serializers.ModelSerializer):
     last_used_address = serializers.SerializerMethodField()
     known_addresses = serializers.SerializerMethodField()
     active_known_addresses = serializers.SerializerMethodField()
+    company_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Client
         fields = '__all__'
+        
+    def get_company_details(self, obj):
+        """Returns the company details if the client is associated with one"""
+        if obj.company:
+            return CompanySerializer(obj.company).data
+        return None
 
     def get_name(self, obj):
         """Fetches the property from the model"""
@@ -108,6 +132,38 @@ class AppointmentSerializer(serializers.ModelSerializer):
     def get_payment_amount(self, obj):
         return obj.payment_amount
     
+    def get_is_future(self, obj):
+        return obj.is_future
+
+    def get_is_past(self, obj):
+        return obj.is_past
+
+class ReminderSerializer(serializers.ModelSerializer):
+    icon = serializers.SerializerMethodField()
+    appointment_date = serializers.SerializerMethodField()
+    start_time = serializers.SerializerMethodField()
+    end_time = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Reminder
+        fields = '__all__'
+
+    def get_appointment_date(self, obj):
+        """Returns the appointment date in YYYY-MM-DD format"""
+        return obj.start.astimezone().date().isoformat()
+    
+    def get_start_time(self, obj):
+        """Returns the start time in HH:mm format"""
+        return obj.start.astimezone().strftime("%H:%M")
+    
+    def get_end_time(self, obj):
+        """Returns the end time in HH:mm format"""
+        return obj.end.astimezone().strftime("%H:%M")
+
+    def get_icon(self, obj):
+        """Fetches the property from the model"""
+        return obj.icon
+
     def get_is_future(self, obj):
         return obj.is_future
 

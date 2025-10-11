@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import CalendarEventSlot, CalendarSettings, Appointment, Blocked
+from .models import CalendarEventSlot, CalendarSettings, Appointment, Blocked, Reminder
 
 class CalendarEventSlotSerializer(serializers.ModelSerializer):
     title = serializers.ReadOnlyField()
@@ -62,7 +62,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
     appointment_date = serializers.SerializerMethodField()
     start_time = serializers.SerializerMethodField()
     end_time = serializers.SerializerMethodField()
-    onsite_address = serializers.SerializerMethodField()
+    onsite_address_details = serializers.SerializerMethodField()
     client_name = serializers.SerializerMethodField()
     employee_name = serializers.SerializerMethodField()
     service_name = serializers.SerializerMethodField()
@@ -85,7 +85,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         """Returns the end time in HH:mm format"""
         return obj.end.astimezone().strftime("%H:%M")
 
-    def get_onsite_address(self, obj):
+    def get_onsite_address_details(self, obj):
         return obj.onsite_address.address if obj.onsite_address else None
 
     def get_title(self, obj):
@@ -124,39 +124,121 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         # Get is_onsite from data or instance
-        is_onsite = data.get('is_onsite', getattr(self.instance, 'is_onsite', False))
+        is_onsite = data.get('is_onsite', False)
         
         # Get onsite_address from data or instance
-        onsite_address = data.get('onsite_address', getattr(self.instance, 'onsite_address', None))
-        print(onsite_address)
+        onsite_address = data.get('onsite_address', None)
+
         # If is_onsite is True, onsite_address is required
-        if is_onsite:
-            if not onsite_address and not data.get('onsite_address_id'):
-                raise serializers.ValidationError({
-                    'onsite_address': 'This field is required when the appointment is registered as onsite.'
-                })
+        if is_onsite and not onsite_address:
+            raise serializers.ValidationError({
+                'onsite_address': 'This field is required when the appointment is registered as onsite.'
+            })
                 
         # If is_onsite is False, ensure onsite_address is None
         if not is_onsite:
             data['onsite_address'] = None
             
         return data
-
-    def create(self, validated_data):
-        # Ensure onsite_address is properly handled
-        if not validated_data.get('is_onsite'):
-            validated_data['onsite_address'] = None
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        # Ensure onsite_address is properly handled
-        if not validated_data.get('is_onsite'):
-            validated_data['onsite_address'] = None
-        return super().update(instance, validated_data)
     
 
 class BlockedSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+    backgroundColor = serializers.SerializerMethodField()
+    borderColor = serializers.SerializerMethodField()
+    textColor = serializers.SerializerMethodField()
+    appointment_date = serializers.SerializerMethodField()
+    start_time = serializers.SerializerMethodField()
+    end_time = serializers.SerializerMethodField()
+
     class Meta:
         model = Blocked
         fields = '__all__'
 
+    def get_appointment_date(self, obj):
+        """Returns the appointment date in YYYY-MM-DD format"""
+        return obj.start.astimezone().date().isoformat()
+    
+    def get_start_time(self, obj):
+        """Returns the start time in HH:mm format"""
+        return obj.start.astimezone().strftime("%H:%M")
+    
+    def get_end_time(self, obj):
+        """Returns the end time in HH:mm format"""
+        return obj.end.astimezone().strftime("%H:%M")
+
+    def get_title(self, obj):
+        """Fetches the property from the model"""
+        return obj.title
+
+    def get_is_future(self, obj):
+        return obj.is_future
+
+    def get_is_past(self, obj):
+        return obj.is_past
+
+    def get_backgroundColor(self, obj):
+        return obj.color
+    
+    def get_borderColor(self, obj):
+        return obj.color
+    
+    def get_textColor(self, obj):
+        return obj.textColor
+    
+class ReminderSerializer(serializers.ModelSerializer):
+    icon = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    backgroundColor = serializers.SerializerMethodField()
+    borderColor = serializers.SerializerMethodField()
+    textColor = serializers.SerializerMethodField()
+    appointment_date = serializers.SerializerMethodField()
+    start_time = serializers.SerializerMethodField()
+    end_time = serializers.SerializerMethodField()
+    isAllDay = serializers.ReadOnlyField(source='all_day')
+
+    class Meta:
+        model = Reminder
+        fields = '__all__'
+
+    def get_appointment_date(self, obj):
+        """Returns the appointment date in YYYY-MM-DD format"""
+        return obj.start.astimezone().date().isoformat()
+    
+    def get_start_time(self, obj):
+        """Returns the start time in HH:mm format"""
+        return obj.start.astimezone().strftime("%H:%M")
+    
+    def get_end_time(self, obj):
+        """Returns the end time in HH:mm format"""
+        return obj.end.astimezone().strftime("%H:%M")
+
+    def get_icon(self, obj):
+        """Fetches the property from the model"""
+        return obj.icon
+    
+    def get_title(self, obj):
+        """Fetches the property from the model"""
+        return obj.title
+
+    def get_is_all_day(self, obj):
+        return obj.all_day
+
+    def get_is_future(self, obj):
+        return obj.is_future
+
+    def get_is_past(self, obj):
+        return obj.is_past
+
+    def get_backgroundColor(self, obj):
+        return obj.color
+    
+    def get_borderColor(self, obj):
+        return obj.color
+    
+    def get_textColor(self, obj):
+        return obj.textColor
+
+    
+
+        

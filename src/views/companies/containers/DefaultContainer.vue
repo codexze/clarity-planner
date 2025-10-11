@@ -2,7 +2,7 @@
   <div class="min-h-screen flex bg-gradient-to-b from-gray-50 via-gray-100 to-gray-50">
     <Sidebar :navigation="navigation" :user_navigation="userNavigation" />
     <div class="flex-1 flex flex-col min-h-screen lg:pl-64">
-      <Header :label="$route.meta.title || 'Dashboard'" :show-back-button="true" />
+      <Header :label="$route.meta.title || 'Staff'" :show-back-button="true" />
       <main class="flex-1 overflow-y-auto">
         <div class="mx-auto max-w-8xl px-4 py-6 sm:px-6 lg:px-8">
           <router-view :key="$route.fullPath"></router-view>
@@ -25,11 +25,12 @@ const navigation = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon, current: false },
   { name: 'Calendar', href: `/planning/${user?.username}/calendar`, icon: CalendarIcon, current: false },
   { name: 'Appointments', href: `/planning/${user?.username}/appointments`, icon: ClockIcon, current: false },
-  { name: 'Companies', href: '/companies', icon: BuildingOfficeIcon, current: false },
+  { name: 'Companies', href: '/companies', icon: BuildingOfficeIcon, current: true },
   { name: 'Clients', href: '/clients', icon: UserGroupIcon, current: false },
-  { name: 'Services', href: '/services', icon: WrenchScrewdriverIcon, current: true },
+  { name: 'Services', href: '/services', icon: WrenchScrewdriverIcon, current: false },
   { name: 'Staff', href: '/staff', icon: UsersIcon, current: false },
 ];
+
 const userNavigation = [
   { name: 'Account', href: '/account', icon: UserIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },

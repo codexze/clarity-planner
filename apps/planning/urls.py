@@ -9,6 +9,7 @@ router = DefaultRouter()
 router.register(r'employees', StaffView, basename='employees')
 router.register(r'appointments', views.AppointmentView, basename='appointments')
 router.register(r'blocked', views.BlockedView, basename='blocked')
+router.register(r'reminders', views.ReminderView, basename='reminders')
 
 urlpatterns = []
 

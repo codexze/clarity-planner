@@ -5,21 +5,77 @@ from django_filters import rest_framework as filters
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
-from apps.planning.views import AppointmentFilter, AppointmentPagination
-from apps.planning.models import Appointment
+from apps.planning.views import AppointmentFilter
+from apps.planning.serializers import ReminderSerializer
+from apps.planning.models import Appointment, Reminder, ReminderReason
 
-from .models import Gender, Client
-from .serializers import ClientSerializer, AppointmentSerializer
+from .models import Gender, Client, KnownAddress, Company
+from .serializers import ClientSerializer, KnownAddressSerializer, AppointmentSerializer, CompanySerializer
 
+class ReminderReasonView(viewsets.ViewSet):
+    def list(self, request):
+        choices = [{"value": choice.value, "label": choice.label} for choice in ReminderReason]
+        return response.Response(choices)
+        
+    
 class GenderView(viewsets.ViewSet):
     def list(self, request):
         choices = [{"value": choice.value, "label": choice.label} for choice in Gender]
         return response.Response(choices)
 
-class ClientPagination(pagination.PageNumberPagination):
+
+
+class Pagination(pagination.PageNumberPagination):
     page_size = 10  # Number of items per page
     page_size_query_param = 'page_size'  # Allow users to set custom page size
     max_page_size = 100  # Prevent very large page sizes
+
+class CompanyFilter(filters.FilterSet):
+    name = filters.CharFilter(field_name='name', label="Search Name")
+    email = filters.CharFilter(field_name='email', lookup_expr='icontains')
+    mobile = filters.CharFilter(field_name='mobile', lookup_expr='startswith')
+    ordering = filters.CharFilter(method='order', label="Order By")
+
+    class Meta:
+        model = Company
+        fields = {
+            'is_active': ['exact'],  # Active services only
+        }
+
+    def order(self, queryset, name, value):
+        return queryset.filter().order_by(value)
+    
+class CompanyView(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = CompanyFilter
+    pagination_class = Pagination  # Enable pagination
+
+    def get_queryset(self):
+        queryset = Company.objects.all()
+        return queryset
+    
+    @action(methods=['get'], detail=False)
+    def all(self, request):
+        companies = Company.objects.all().order_by('name')
+        serializer = CompanySerializer(companies, many=True)
+        return response.Response(serializer.data)
+
+    @action(methods=['get'], detail=False)
+    def filter(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
+    
 
 class ClientFilter(filters.FilterSet):
     name = filters.CharFilter(method='filter_name', label="Search Name")
@@ -27,7 +83,8 @@ class ClientFilter(filters.FilterSet):
     email = filters.CharFilter(field_name='email', lookup_expr='icontains')
     mobile = filters.CharFilter(field_name='mobile', lookup_expr='startswith')
     gender = filters.CharFilter(field_name='gender', lookup_expr='iexact')
-    sorting = filters.CharFilter(method='do_sorting', label="Order By")
+    company = filters.NumberFilter(field_name='company', lookup_expr='exact')
+    ordering = filters.CharFilter(method='order', label="Order By")
 
     class Meta:
         model = Client
@@ -53,7 +110,11 @@ class ClientFilter(filters.FilterSet):
         except:
             return queryset
 
-    def do_sorting(self, queryset, name, value):
+    def order(self, queryset, name, value):
+        if 'name' in value:
+            if value.startswith('-'):
+                return queryset.filter().order_by('first_name', 'surname').reverse()
+            return queryset.filter().order_by('first_name', 'surname')
         return queryset.filter().order_by(value)
 
 
@@ -64,7 +125,7 @@ class ClientView(viewsets.ModelViewSet):
     serializer_class = ClientSerializer
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = ClientFilter
-    pagination_class = ClientPagination  # Enable pagination
+    pagination_class = Pagination  # Enable pagination
 
     def get_queryset(self):
         queryset = Client.objects.all()
@@ -89,11 +150,19 @@ class ClientView(viewsets.ModelViewSet):
         
         # Apply filtering and pagination
         filtered_appointments = AppointmentFilter(request.GET, queryset=appointments).qs
-        paginator = AppointmentPagination()
+        paginator = Pagination()
         paginated_appointments = paginator.paginate_queryset(filtered_appointments, request)
         
         serializer = AppointmentSerializer(paginated_appointments, many=True)
         return paginator.get_paginated_response(serializer.data)
+    
+    @action(methods=['get'], detail=True)
+    def reminders(self, request, pk=None):
+        client = get_object_or_404(Client, pk=pk)
+        reminders = Reminder.objects.filter(client=client).order_by('start')
+                
+        serializer = ReminderSerializer(reminders, many=True)
+        return response.Response(serializer.data)
     
 
     def create(self, request, *args, **kwargs):
@@ -113,3 +182,67 @@ class ClientView(viewsets.ModelViewSet):
             instance.set_record(request.user)
             return response.Response(serializer.data, status=status.HTTP_200_OK)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            self.perform_update(serializer)
+            instance.refresh_from_db()
+            instance.set_record(request.user)
+            return response.Response(serializer.data, status=status.HTTP_200_OK)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class KnownAddressFilter(filters.FilterSet):
+    client_id = filters.NumberFilter(field_name='client__id', lookup_expr='exact')
+    address = filters.CharFilter(field_name='address', lookup_expr='icontains')
+    is_active = filters.BooleanFilter(field_name='is_active')
+    ordering = filters.CharFilter(method='order', label="Order By")
+
+    class Meta:
+        model = KnownAddress
+        fields = {
+            'is_active': ['exact'],  # Active addresses only
+        }
+    
+    def order(self, queryset, name, value):
+        return queryset.filter().order_by(value)
+    
+class KnownAddressView(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    queryset = KnownAddress.objects.all()
+    serializer_class = KnownAddressSerializer
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = KnownAddressFilter
+    pagination_class = Pagination  # Enable pagination
+
+    def get_queryset(self):
+        queryset = KnownAddress.objects.all()
+        return queryset
+    
+    @action(methods=['get'], detail=False)
+    def filter(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
+
+    # update is_active status
+    @action(methods=['patch'], detail=True)
+    def set_active(self, request, pk=None):
+        instance = self.get_object()
+        is_active = request.data.get('is_active')
+        if is_active is None:
+            return response.Response({"detail": "is_active field is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        instance.is_active = is_active
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return response.Response(serializer.data)

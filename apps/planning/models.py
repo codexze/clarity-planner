@@ -43,10 +43,10 @@ class CalendarSettings(Subrecord):
     
     inhouse_appointment_bgcolor = ColorField(default='#2b7fff')
     inhouse_appointment_textcolor = ColorField(default='#ffffff')
-    onsite_appointment_bgcolor = ColorField(default='#fd9a00')
+    onsite_appointment_bgcolor = ColorField(default='#4f39f6')
     onsite_appointment_textcolor = ColorField(default='#ffffff')
 
-    blocked_bgcolor = ColorField(default='#4f39f6')
+    blocked_bgcolor = ColorField(default='#fe9a00')
     blocked_textcolor = ColorField(default='#ffffff')
     reminder_bgcolor = ColorField(default='#8200db')
     reminder_textcolor = ColorField(default='#ffffff')
@@ -257,6 +257,7 @@ class AppointmentAddon(models.Model):
     
 class Blocked(Slot, Subrecord):
     employee = models.ForeignKey(User, related_name='blocked', on_delete=models.CASCADE)
+    notes = models.TextField(null=True, blank=True)
     reason = models.CharField(max_length=255)
 
     class Meta:
@@ -306,22 +307,66 @@ class ReminderReason(models.TextChoices):
     other = "OTHER"
 
 class Reminder(Slot, Subrecord):
+    global_reminder = models.BooleanField(default=False)
+    employee = models.ForeignKey(User, blank=True, null=True, related_name='reminders', on_delete=models.CASCADE)
     client = models.ForeignKey(Client, related_name='reminder', on_delete=models.CASCADE)
     reason = models.CharField(choices=ReminderReason.choices, default=ReminderReason.other)
-    description = models.CharField(max_length=255)
+    other_reason = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "reminders"
 
+    def get_icon(self):
+        icons = {
+            ReminderReason.birthday: ['fas', 'cake-candles'],
+            ReminderReason.anniversary: ['fas', 'champagne-glasses'],
+            ReminderReason.graduation: ['fas', 'graduation-cap'],
+            ReminderReason.other: ['fas', 'bell']
+        }
+        return icons.get(self.reason, ['fas', 'bell'])
+
+    def get_bgcolor(self):
+        if self.employee and hasattr(self.employee, 'calendarsettings'):
+            settings = self.employee.calendarsettings
+            return settings.reminder_bgcolor
+
+        return '#8200db'
+
+    def get_textcolor(self):
+        if self.employee and hasattr(self.employee, 'calendarsettings'):
+            settings = self.employee.calendarsettings
+            return settings.reminder_textcolor
+        return '#ffffff'
+
     @property
     def resourceId(self):
         return 'reminderSlot'
+    
+    @property
+    def textColor(self):
+        return self.get_textcolor()
+    
+    @property
+    def color(self):
+        return self.get_bgcolor()
 
+    @property
+    def icon(self):
+        return self.get_icon()
+    
     @property
     def title(self):
         return f'{self.client.name}'
+    
+    @property
+    def all_day(self):
+        return True
 
     @property
     def is_past(self):
         return datetime.date.today() > self.start.date()
+
+    @property
+    def is_future(self):
+        return datetime.date.today() < self.start.date()
 

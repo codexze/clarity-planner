@@ -2,24 +2,24 @@
   <div class="p-8">
     <!-- Header Section -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Staff Management</h1>
-      <p class="mt-2 text-gray-600">Manage your staff and their details</p>
+      <h1 class="text-3xl font-bold text-gray-900">Company Management</h1>
+      <p class="mt-2 text-gray-600">Manage your companies and their details</p>
     </div>
 
     <div class="relative overflow-x-auto p-4 bg-white shadow-md sm:rounded-lg">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <router-link to="/staff/new" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+          <router-link to="/companies/new" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
             <font-awesome-icon :icon="['fas', 'plus']" class="mr-2" />
-            New Employee
+            New Company
           </router-link>
         </div>
       </div>
 
       <!-- Filters Section -->
-      <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-5">
+      <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-4">
         <div>
-          <label for="name-filter" class="block text-sm font-medium text-gray-700">Employee Name</label>
+          <label for="name-filter" class="block text-sm font-medium text-gray-700">Company Name</label>
           <div class="mt-1">
             <input type="text" id="name-filter" v-model="filters.name" @input="debouncedFilter" class="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm text-gray-600 hover:border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-150" placeholder="Search by name..." />
           </div>
@@ -31,19 +31,9 @@
           </div>
         </div>
         <div>
-          <label for="mobile-filter" class="block text-sm font-medium text-gray-700">Phone</label>
+          <label for="phone-filter" class="block text-sm font-medium text-gray-700">Phone</label>
           <div class="mt-1">
-            <input type="text" id="mobile-filter" v-model="filters.mobile" @input="debouncedFilter" class="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm text-gray-600 hover:border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-150" placeholder="Search by phone..." />
-          </div>
-        </div>
-        <div>
-          <label for="status-filter" class="block text-sm font-medium text-gray-700">Status</label>
-          <div class="mt-1">
-            <select id="status-filter" v-model="filters.is_active" @change="itemProvider" class="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm text-gray-600 hover:border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-150">
-              <option :value="null">All Statuses</option>
-              <option :value="true">Available</option>
-              <option :value="false">Unavailable</option>
-            </select>
+            <input type="text" id="phone-filter" v-model="filters.phone" @input="debouncedFilter" class="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm text-gray-600 hover:border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-150" placeholder="Search by phone..." />
           </div>
         </div>
         <div class="flex items-end">
@@ -52,25 +42,25 @@
       </div>
     </div>
 
-    <!-- Staff Table -->
+    <!-- Companies Table -->
     <div class="mt-6 relative overflow-x-auto bg-white shadow-md sm:rounded-lg">
       <div v-if="loading" class="flex justify-center py-8">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
 
       <div v-else>
-        <table class="w-full text-sm text-left text-gray-500">
+        <table class="p-4 w-full text-sm text-left text-gray-500">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th scope="col" class="px-6 py-3 cursor-pointer" @click="sort('surname')">
+              <th scope="col" class="px-6 py-3 cursor-pointer" @click="sort('name')">
                 <div class="flex items-center">
-                  Employee Name
+                  Company Name
                   <font-awesome-icon :icon="['fas', 'sort']" class="ml-1 text-gray-400" />
                 </div>
               </th>
-              <th scope="col" class="px-6 py-3">Date of Birth</th>
               <th scope="col" class="px-6 py-3">Email</th>
               <th scope="col" class="px-6 py-3">Phone</th>
+              <th scope="col" class="px-6 py-3">Website</th>
               <th scope="col" class="px-6 py-3 cursor-pointer" @click="sort('is_active')">
                 <div class="flex items-center">
                   Status
@@ -81,52 +71,50 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="employee in staff" :key="employee.id" class="bg-white border-b border-gray-200 hover:bg-gray-50">
+            <tr v-for="company in companies" :key="company.id" class="bg-white border-b border-gray-200 hover:bg-gray-50">
               <td class="px-6 py-4 font-medium text-gray-900">
                 <div class="flex items-center">
-                  <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                    <font-awesome-icon :icon="['fas', 'user']" class="text-blue-600 text-sm" />
-                  </div>
-                  <div>
-                    <p class="font-medium">{{ employee.display }}</p>
-                    <p class="text-xs text-gray-500">ID: {{ employee.id }}</p>
-                  </div>
+                  <font-awesome-icon :icon="['fas', 'building']" class="mr-2 text-gray-400" />
+                  {{ company.name }}
                 </div>
               </td>
               <td class="px-6 py-4">
-                <span>{{ toLocaleDate(employee.date_of_birth) }}</span>
-              </td>
-              <td class="px-6 py-4">
-                <span v-if="employee.email" class="text-blue-600 hover:underline">
-                  <a :href="`mailto:${employee.email}`">{{ employee.email }}</a>
+                <span v-if="company.email" class="text-blue-600 hover:underline">
+                  <a :href="`mailto:${company.email}`">{{ company.email }}</a>
                 </span>
                 <span v-else class="text-gray-400">—</span>
               </td>
               <td class="px-6 py-4">
-                <span v-if="employee.mobile">{{ employee.mobile }}</span>
+                <span v-if="company.phone">{{ company.phone }}</span>
                 <span v-else class="text-gray-400">—</span>
               </td>
               <td class="px-6 py-4">
-                <span :class="employee.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
-                  {{ employee.is_active ? 'Active' : 'Inactive' }}
+                <span v-if="company.website" class="text-blue-600 hover:underline">
+                  <a :href="company.website" target="_blank">{{ company.website }}</a>
+                </span>
+                <span v-else class="text-gray-400">—</span>
+              </td>
+              <td class="px-6 py-4">
+                <span :class="company.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                  {{ company.is_active ? 'Active' : 'Inactive' }}
                 </span>
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center space-x-2">
-                  <router-link :to="`/staff/${employee.username}/view`" class="text-blue-600 hover:text-blue-800">
+                  <router-link :to="`/companies/${company.id}/view`" class="text-blue-600 hover:text-blue-800">
                     <font-awesome-icon :icon="['fas', 'eye']" />
                   </router-link>
-                  <button @click="toggleStatus(employee)" :class="employee.is_active ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'">
-                    <font-awesome-icon :icon="employee.is_active ? ['fas', 'ban'] : ['fas', 'check']" />
+                  <button @click="toggleStatus(company)" :class="company.is_active ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'">
+                    <font-awesome-icon :icon="company.is_active ? ['fas', 'ban'] : ['fas', 'check']" />
                   </button>
                 </div>
               </td>
             </tr>
-            <tr v-if="staff.length === 0">
+            <tr v-if="companies.length === 0">
               <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                <font-awesome-icon :icon="['fas', 'users']" class="text-4xl text-gray-300 mb-2" />
-                <p>No staff found</p>
-                <!-- <router-link to="/staff/new" class="text-blue-600 hover:text-blue-800">Create your first employee</router-link> -->
+                <font-awesome-icon :icon="['fas', 'building']" class="text-4xl text-gray-300 mb-2" />
+                <p>No companies found</p>
+                <router-link to="/companies/new" class="text-blue-600 hover:text-blue-800">Create your first company</router-link>
               </td>
             </tr>
           </tbody>
@@ -134,7 +122,7 @@
 
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="flex items-center justify-between px-6 py-3 bg-gray-50">
-          <div class="text-sm text-gray-700">Showing {{ staff.length }} of {{ count }} staff</div>
+          <div class="text-sm text-gray-700">Showing {{ companies.length }} of {{ count }} companies</div>
           <div class="flex space-x-2">
             <button @click="previousPage" :disabled="isFirstPage" class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 border border-transparent rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-500">Previous</button>
             <span class="px-3 py-1 text-sm">{{ currentPage }} / {{ totalPages }}</span>
@@ -158,21 +146,23 @@ export default {
       currentPage: 1,
       pageSize: 10,
       totalPages: 1,
-      sortBy: 'surname',
       filters: {
         name: null,
         email: null,
-        mobile: null,
-        is_active: null,
+        phone: null,
       },
+      sortBy: 'name',
       sortOrder: 'asc',
-      staff: [],
+      companies: [],
       debouncedFilter: null,
     };
   },
   computed: {
+    ...mapState('companies', {
+      allCompanies: (state) => state.companies,
+    }),
     sorting() {
-      return this.sortOrder === 'asc' ? this.sortBy : `-${this.sortBy}`; // DRF sorting syntax
+      return this.sortOrder === 'asc' ? this.sortBy : `-${this.sortBy}`;
     },
     isFirstPage() {
       return this.currentPage === 1;
@@ -182,20 +172,19 @@ export default {
     },
   },
   methods: {
-    ...mapActions('staff', ['filterStaff', 'updateEmployeeById']),
+    ...mapActions('companies', ['filterCompanies', 'updateCompanyById']),
     itemProvider() {
       this.loading = true;
-      this.filterStaff({
+      this.filterCompanies({
         page: this.currentPage,
         page_size: this.pageSize,
         ordering: this.sorting,
         name: this.filters.name || undefined,
         email: this.filters.email || undefined,
-        mobile: this.filters.mobile || undefined,
-        is_active: this.filters.is_active !== null ? this.filters.is_active : undefined,
+        phone: this.filters.phone || undefined,
       })
         .then((response) => {
-          this.staff = response.results || response;
+          this.companies = response.results || response;
           this.count = response.count || response.length;
           this.totalPages = Math.ceil(this.count / this.pageSize);
         })
@@ -217,7 +206,7 @@ export default {
       this.filters = {
         name: null,
         email: null,
-        mobile: null,
+        phone: null,
       };
       this.currentPage = 1;
       this.itemProvider();
@@ -234,16 +223,16 @@ export default {
         this.itemProvider();
       }
     },
-    async toggleStatus(employee) {
+    async toggleStatus(company) {
       try {
-        await this.updateEmployeeById({
-          id: employee.id,
-          is_active: !employee.is_active,
+        await this.updateCompanyById({
+          id: company.id,
+          is_active: !company.is_active,
         });
-        this.toastSuccess(`Employee "${employee.display}" status updated successfully!`);
+        this.toastSuccess(`Company "${company.name}" status updated successfully!`);
         this.itemProvider();
       } catch (error) {
-        this.toastError('Failed to update employee status');
+        this.toastError('Failed to update company status');
       }
     },
   },

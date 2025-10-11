@@ -54,7 +54,7 @@ class StaffSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     age = serializers.SerializerMethodField()
     display = serializers.SerializerMethodField()
-    services = serializers.PrimaryKeyRelatedField( many=True, queryset=ServiceType.objects.all(), required=False)
+    services = serializers.SerializerMethodField()
 
     class Meta:
         model = Staff
@@ -72,37 +72,47 @@ class StaffSerializer(serializers.ModelSerializer):
         """Fetches the property from the model"""
         return obj.display
     
+    def get_services(self, obj):
+        """Return array of ServiceType IDs for active staff services"""
+        return list(obj.staffservice_set.filter(is_active=True).values_list('service_type_id', flat=True))
+    
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         return ret
 
     def create(self, validated_data):
-        services = validated_data.pop('services', None)
+        # Extract services from initial_data since it's now a SerializerMethodField
+        services_data = self.initial_data.get('services', [])
         
         # Create staff instance
         instance = super().create(validated_data)
 
         # Handle services if provided
-        if services:
-            # Create StaffService entries for each service
-            for service in services:
-                StaffService.objects.create(staff=instance,service_type=service,is_active=True)
+        if services_data:
+            # Create StaffService entries for each service ID
+            for service_id in services_data:
+                try:
+                    service_type = ServiceType.objects.get(id=service_id)
+                    StaffService.objects.create(staff=instance, service_type=service_type, is_active=True)
+                except ServiceType.DoesNotExist:
+                    continue
 
         return instance
 
     def update(self, instance, validated_data):
-        services = validated_data.pop('services', None)
+        # Extract services from initial_data since it's now a SerializerMethodField
+        services_data = self.initial_data.get('services')
         
         # Update other staff fields
         instance = super().update(instance, validated_data)
 
         # Handle services update if provided
-        if services is not None:
+        if services_data is not None:
             # Get current active services
             current_services = set(instance.staffservice_set.filter(is_active=True).values_list('service_type_id', flat=True))
             
-            # Convert new services to set
-            new_services = set(service.id for service in services)
+            # Convert new services to set (they're already IDs)
+            new_services = set(int(service_id) for service_id in services_data if service_id)
 
             # Services to deactivate
             to_deactivate = current_services - new_services
@@ -111,7 +121,11 @@ class StaffSerializer(serializers.ModelSerializer):
 
             # Services to activate or create
             for service_type_id in new_services:
-                StaffService.objects.update_or_create(staff=instance,service_type_id=service_type_id,defaults={'is_active': True})
+                StaffService.objects.update_or_create(
+                    staff=instance,
+                    service_type_id=service_type_id,
+                    defaults={'is_active': True}
+                )
 
         return instance
     
