@@ -26,31 +26,31 @@ const mutations = {
 
 const actions = {
   async getServiceTypes({ commit }) {
-    const types = await session.get('api/inhouse/service_types/');
+    const types = await session.get('api/v1/services/service-types/');
     commit('SET_SERVICETYPES', types.data);
     return types.data;
   },
   async getServicesByType({ commit }, type) {
-    const services = await session.get(`api/inhouse/services/type/${type}`);
+    const services = await session.get(`api/v1/services/services/type/${type}`);
     return services.data;
   },
   async getServices({ commit }) {
-    const services = await session.get('api/inhouse/services/');
+    const services = await session.get('api/v1/services/services/');
     commit('SET_SERVICES', services.data);
     return services.data;
   },
   async getServiceById({ commit }, id) {
-    const service = await session.get(`api/inhouse/services/${id}`);
+    const service = await session.get(`api/v1/services/services/${id}`);
     commit('SET_SERVICE', service.data);
     return service.data;
   },
   async filterServices({ commit }, params) {
-    const services = await session.get('api/inhouse/services/filter/', { params: params });
+    const services = await session.get('api/v1/services/services/filter/', { params: params });
     return services.data;
   },
   createService({ commit }, data) {
     return session
-      .post(`api/inhouse/services/`, data)
+      .post(`api/v1/services/services/`, data)
       .then((response) => {
         return response.data;
       })
@@ -58,7 +58,7 @@ const actions = {
   },
   updateServiceById({ commit }, data) {
     return session
-      .put(`api/inhouse/services/${data.id}/`, data)
+      .put(`api/v1/services/services/${data.id}/`, data)
       .then((response) => {
         commit('SET_SERVICE', response.data);
         return response.data;
@@ -66,16 +66,16 @@ const actions = {
       .finally(() => {});
   },
   async getAddonsByType({ commit }, type) {
-    const addon = await session.get(`api/inhouse/addons/type/${type}`);
+    const addon = await session.get(`api/v1/services/addons/type/${type}`);
     return addon.data;
   },
   async filterAddons({ commit }, params) {
-    const addons = await session.get('api/inhouse/addons/filter/', { params: params });
+    const addons = await session.get('api/v1/services/addons/filter/', { params: params });
     return addons.data;
   },
   createAddon({ commit }, data) {
     return session
-      .post(`api/inhouse/addons/`, data)
+      .post(`api/v1/services/addons/`, data)
       .then((response) => {
         return response.data;
       })
@@ -83,7 +83,7 @@ const actions = {
   },
   updateAddonById({ commit }, data) {
     return session
-      .put(`api/inhouse/addons/${data.id}/`, data)
+      .put(`api/v1/services/addons/${data.id}/`, data)
       .then((response) => {
         return response.data;
       })
@@ -91,7 +91,7 @@ const actions = {
   },
   async activateAddon({ commit }, data) {
     return session
-      .patch(`api/inhouse/addons/${data.id}/activate/`, { consistency_token: data.consistency_token })
+      .patch(`api/v1/services/addons/${data.id}/activate/`, { consistency_token: data.consistency_token })
       .then((response) => {
         return response.data;
       })
@@ -99,7 +99,7 @@ const actions = {
   },
   async deactivateAddon({ commit }, data) {
     return session
-      .patch(`api/inhouse/addons/${data.id}/deactivate/`, { consistency_token: data.consistency_token })
+      .patch(`api/v1/services/addons/${data.id}/deactivate/`, { consistency_token: data.consistency_token })
       .then((response) => {
         return response.data;
       })

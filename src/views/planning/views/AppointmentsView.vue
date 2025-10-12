@@ -175,8 +175,10 @@ export default {
     };
   },
   computed: {
-    ...mapState('planning', {
+    ...mapState('employees', {
       settings: (state) => state.settings,
+    }),
+    ...mapState('planning', {
       employee: (state) => state.employee,
       employees: (state) => state.employees,
     }),

@@ -5,30 +5,11 @@ from colorfield.fields import ColorField
 from apps.core.models import *
 from apps.authorize.models import User
 from apps.clients.models import Client, KnownAddress
-from apps.inhouse.models import Service, Addon
+from apps.services.models import Service, Addon
 
 
 DATE_FORMAT_REVERSED = "%Y-%m-%d"
 WEEKDAY_FORMAT = "%A"
-
-class CalendarEventSlot(models.Model):
-    duration = models.TimeField()
-
-    @property
-    def title(self):
-        title = ""
-        if self.duration.hour > 0:
-            title += f"{self.duration.hour} hour"
-
-        if self.duration.minute > 0:
-            title += f"{self.duration.minute} minutes"
-
-        return title
-
-    def __str__(self):
-        return self.title
-
-# See Fullcalendar view options
 class CalendarViews(models.TextChoices):
     DAY = 'timeGridDay'
     WEEK = 'timeGridWeek'
@@ -38,7 +19,6 @@ class CalendarSettings(Subrecord):
     default_view = models.CharField(default=CalendarViews.WEEK, choices=CalendarViews.choices)
     enable_weekends = models.BooleanField(default=False)
     business_hours = models.JSONField(default=list)
-    event_slots = models.ManyToManyField(CalendarEventSlot)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
     inhouse_appointment_bgcolor = ColorField(default='#2b7fff')
@@ -69,7 +49,7 @@ class CalendarSettings(Subrecord):
         return [
             (i + 1) % 7 for i, day in enumerate(calendar.day_name) if (i + 1) % 7 not in [6, 0]  # Exclude weekend days
         ]
-
+    
     @property
     def current_day_hours(self):
         # Filter data based on the current day
@@ -108,9 +88,7 @@ class CalendarSettings(Subrecord):
             user = user,
             business_hours=cls.default_business_hours()
         )
-        
-        events = CalendarEventSlot.objects.all()[:5]
-        settings.event_slots.set(events)
+        return settings
 
     class Meta:
         verbose_name_plural = "calendar settings"
@@ -138,18 +116,18 @@ class Appointment(Slot, Subrecord):
 
     client = models.ForeignKey(Client, related_name='appointments', on_delete=models.PROTECT)
     service = models.ForeignKey(Service, related_name='appointments', on_delete=models.PROTECT)
-    service_price = models.DecimalField(max_digits=10, decimal_places=2) # this save the price in time, useful for reporting
+    service_price = models.DecimalField(max_digits=10, decimal_places=2) 
     employee = models.ForeignKey(User, related_name='appointments', on_delete=models.PROTECT)
 
     notes = models.TextField(null=True, blank=True)
     
-    is_onsite = models.BooleanField(default=False) # tells us if it is a inn house or onsite booking, useful for reporting
+    is_onsite = models.BooleanField(default=False)
     onsite_address = models.ForeignKey(KnownAddress, related_name='appointments', on_delete=models.PROTECT, null=True, blank=True)
 
     arrived = models.BooleanField(default=False)
-    arrived_time = models.TimeField(null=True, blank=True) # helpfull to know
-    cancelation = models.BooleanField(default=False) # helpfull to know
-    cancelation_reason = models.CharField(max_length=255, null=True, blank=True) # helpfull to know
+    arrived_time = models.TimeField(null=True, blank=True)
+    cancelation = models.BooleanField(default=False)
+    cancelation_reason = models.CharField(max_length=255, null=True, blank=True)
     processed = models.BooleanField(default=False, help_text=HELP_DP)
 
     def __str__(self):
@@ -238,7 +216,6 @@ class Appointment(Slot, Subrecord):
     
     @property
     def can_change_processed(self):
-
         if self.is_future:
             return False
 
@@ -255,7 +232,7 @@ class AppointmentAddon(models.Model):
     def __str__(self):
         return f"{self.addon.name} - {self.addon_price}"
     
-class Blocked(Slot, Subrecord):
+class BlockedTime(Slot, Subrecord):
     employee = models.ForeignKey(User, related_name='blocked', on_delete=models.CASCADE)
     notes = models.TextField(null=True, blank=True)
     reason = models.CharField(max_length=255)

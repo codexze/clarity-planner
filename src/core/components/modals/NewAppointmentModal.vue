@@ -35,7 +35,7 @@
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
                       <div class="px-6 py-4 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                          <font-awesome-icon :icon="['fas', 'calendar-clock']" class="mr-3 text-blue-600" />
+                          <font-awesome-icon :icon="['fas', 'calendar']" class="mr-3 text-blue-600" />
                           Schedule & Timing
                         </h3>
                         <p class="mt-1 text-sm text-gray-600">Set the appointment date and duration</p>
@@ -475,7 +475,7 @@
                           <div v-if="filteredAddons.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div v-for="(addon, index) in filteredAddons" :key="addon.id" class="group relative flex items-start p-4 bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer" :class="{ 'border-blue-500 bg-blue-50': form.addons.includes(addon.id) }" @click="toggleAddon(addon.id)">
                               <div class="flex items-center h-5">
-                                <input :id="`addon-checkbox-${index}`" type="checkbox" :checked="form.addons" :value="addon.id" v-model="form.addons" class="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-colors duration-200" @change="handleTimespanChange" @click.stop />
+                                <font-awesome-icon :icon="['fas', form.addons.includes(addon.id) ? 'check-circle' : 'circle']" class="text-xl" :class="form.addons.includes(addon.id) ? 'text-blue-600' : 'text-gray-300'" />
                               </div>
                               <div class="ml-4 flex-1 min-w-0">
                                 <label :for="`addon-checkbox-${index}`" class="cursor-pointer">
@@ -583,16 +583,15 @@ export default {
         notes: null,
       }),
 
+      intervalTime: [],
       start_time: null,
       end_time: null,
       type: null,
       client: null,
       addresses: [],
-      addonSearch: '',
-
-      intervalTime: [],
       serviceTypes: [],
       services: [],
+      addonSearch: '',
       addons: [],
       employees: [],
     };
@@ -602,9 +601,7 @@ export default {
       handler(val) {
         if (val) {
           this.start_time = moment(val.start).format('HH:mm');
-          // console.log("start_time:", this.start_time);
           this.end_time = moment(val.end).format('HH:mm');
-          // console.log("end_time:", this.end_time);
         }
       },
     },
@@ -614,7 +611,6 @@ export default {
           var date = moment(this.selectedEvent.start);
           date.set({ h: moment(val, 'HH:mm').get('h'), m: moment(val, 'HH:mm').get('m') });
           this.form.start = date.toISOString(true);
-          // console.log(this.form.data());
         }
       },
     },
@@ -624,7 +620,6 @@ export default {
           var date = moment(this.selectedEvent.end);
           date.set({ h: moment(val, 'HH:mm').get('h'), m: moment(val, 'HH:mm').get('m') });
           this.form.end = date.toISOString(true);
-          // console.log(this.form.data());
         }
       },
     },
@@ -693,8 +688,8 @@ export default {
   },
   methods: {
     ...mapActions('services', ['getServiceTypes', 'getServicesByType', 'getAddonsByType']),
-    ...mapActions('staff', ['getEmployeesByServiceType']),
-    ...mapActions('planning', ['getConfig', 'loadIntervalTime', 'createAppointment']),
+    ...mapActions('employees', ['getConfig', 'getEmployeesByServiceType']),
+    ...mapActions('planning', ['loadIntervalTime', 'createAppointment']),
     toggle() {
       this.visible = !this.visible;
     },
@@ -729,7 +724,6 @@ export default {
       this.toggleClientTable();
     },
     onServiceChange() {
-      console.log('Selected service:', this.selectedService);
       this.form.service_price = this.selectedService.price;
       this.calculateEndTime();
     },
@@ -749,7 +743,6 @@ export default {
         }
       });
 
-      // Calculate new end time
       const startMoment = moment(this.start_time, 'HH:mm');
       const endMoment = startMoment.clone().add(minutes, 'minutes');
       this.end_time = endMoment.format('HH:mm');
@@ -767,10 +760,8 @@ export default {
 
       this.form.total_cost = totalCost;
     },
-    handleAddonChange(addon) {
-      // Calculate total duration and update end time
+    handleAddonChange() {
       this.calculateTotalDuration();
-      // Calculate total cost
       this.calculateTotalCost();
     },
     toggleAddon(addonId) {
@@ -780,19 +771,26 @@ export default {
       } else {
         this.form.addons.push(addonId);
       }
-      this.calculateTotalDuration();
-      this.calculateTotalCost();
+      this.handleAddonChange();
     },
     close() {
+      this.intervalTime = [];
       this.start_time = null;
       this.end_time = null;
       this.type = null;
-      this.form.reset(this.selectedEvent);
+      this.client = null;
+      this.addresses = [];
+      this.serviceTypes = [];
+      this.services = [];
+      this.addonSearch = '';
+      this.addons = [];
+      this.employees = [];
+
+      this.form.reset();
       this.visible = false;
       this.$emit('cancel');
     },
-    handleSubmit() {
-      // console.log("Submitting form:", this.form.data());
+    submit() {
       this.createAppointment(this.form.data())
         .then((response) => {
           this.$emit('created', response);
@@ -806,9 +804,9 @@ export default {
   async mounted() {
     this.config = await this.getConfig();
     this.intervalTime = await this.loadIntervalTime({
-      start: this.config.slot.MIN,
-      end: this.config.slot.MAX,
-      interval: this.config.slot.INTERVAL,
+      start: this.config?.slot.MIN,
+      end: this.config?.slot.MAX,
+      interval: this.config?.slot.INTERVAL,
     });
 
     this.serviceTypes = await this.getServiceTypes();

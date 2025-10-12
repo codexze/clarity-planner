@@ -1,20 +1,20 @@
-import DefaultContainer from '@/views/staff/containers/DefaultContainer.vue';
-import Staff from '@/views/staff/views/StaffView.vue';
-import EmployeeDetailsView from '@/views/staff/views/EmployeeDetailsView.vue';
-import NewEmployeeView from '@/views/staff/views/NewEmployeeView.vue';
+import DefaultContainer from '@/views/employees/containers/DefaultContainer.vue';
+import Employee from '@/views/employees/views/EmployeesView.vue';
+import EmployeeDetailsView from '@/views/employees/views/EmployeeDetailsView.vue';
+import NewEmployeeView from '@/views/employees/views/NewEmployeeView.vue';
 
 const routes = [
   {
-    path: '/staff',
+    path: '/employees',
     component: DefaultContainer,
     meta: { requiresAuth: true },
     children: [
       {
         path: '',
-        component: Staff,
+        component: Employee,
         meta: {
-          title: 'Staff',
-          description: 'Manage your staff members',
+          title: 'Employee',
+          description: 'Manage your employee members',
           requiresAuth: true,
         },
       },

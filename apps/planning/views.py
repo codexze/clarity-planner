@@ -6,12 +6,16 @@ from django.db.models import Q
 from django.db import transaction
 
 from apps.clients.models import KnownAddress
-from apps.inhouse.models import Addon
+from apps.services.models import Addon
 
-from .models import Appointment, Blocked, Reminder,AppointmentAddon
-from .serializers import AppointmentSerializer, BlockedSerializer, ReminderSerializer
+from .models import Appointment, BlockedTime, Reminder, ReminderReason, AppointmentAddon
+from .serializers import AppointmentSerializer, BlockedTimeSerializer, ReminderSerializer
 
-
+class ReminderReasonView(viewsets.ViewSet):
+    def list(self, request):
+        choices = [{"value": choice.value, "label": choice.label} for choice in ReminderReason]
+        return response.Response(choices)
+        
 
 class Pagination(pagination.PageNumberPagination):
     page_size = 10  # Number of items per page
@@ -84,6 +88,31 @@ class AppointmentView(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
     
+    @action(methods=['get'], detail=False, url_path='employee/(?P<username>[^/.]+)')
+    def employee_appointments(self, request, username=None):
+        from apps.authorize.models import User
+        try:
+            employee = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return response.Response({'error': 'Employee not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        start_param = request.query_params.get('start')
+        end_param = request.query_params.get('end')
+        
+        queryset = Appointment.objects.filter(employee=employee)
+        
+        if start_param and end_param:
+            try:
+                start = datetime.datetime.strptime(start_param, "%Y-%m-%dT%H:%M:%S%z")
+                end = datetime.datetime.strptime(end_param, "%Y-%m-%dT%H:%M:%S%z")
+                queryset = queryset.filter(start__gte=start, end__lte=end)
+            except ValueError:
+                # If parsing fails, return all appointments for the employee
+                pass
+        
+        appointments = AppointmentSerializer(queryset, many=True)
+        return response.Response(appointments.data)
+    
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -152,13 +181,38 @@ class AppointmentView(viewsets.ModelViewSet):
             return response.Response(serializer.data, status=status.HTTP_200_OK)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class BlockedView(viewsets.ModelViewSet):
+class BlockedTimeView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = BlockedSerializer
+    serializer_class = BlockedTimeSerializer
 
     def get_queryset(self):
-        queryset = Blocked.objects.all()
+        queryset = BlockedTime.objects.all()
         return queryset
+    
+    @action(methods=['get'], detail=False, url_path='employee/(?P<username>[^/.]+)')
+    def employee_blocked(self, request, username=None):
+        from apps.authorize.models import User
+        try:
+            employee = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return response.Response({'error': 'Employee not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        start_param = request.query_params.get('start')
+        end_param = request.query_params.get('end')
+        
+        queryset = BlockedTime.objects.filter(employee=employee)
+        
+        if start_param and end_param:
+            try:
+                start = datetime.datetime.strptime(start_param, "%Y-%m-%dT%H:%M:%S%z")
+                end = datetime.datetime.strptime(end_param, "%Y-%m-%dT%H:%M:%S%z")
+                queryset = queryset.filter(start__gte=start, end__lte=end)
+            except ValueError:
+                # If parsing fails, return all blocked times for the employee
+                pass
+
+        blocked = BlockedTimeSerializer(queryset, many=True)
+        return response.Response(blocked.data)
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -202,6 +256,37 @@ class ReminderView(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Reminder.objects.all()
         return queryset
+    
+    @action(methods=['get'], detail=False, url_path='reasons')
+    def reasons(self, request):
+        choices = [{"value": choice.value, "label": choice.label} for choice in ReminderReason]
+        return response.Response(choices)
+    
+    @action(methods=['get'], detail=False, url_path='employee/(?P<username>[^/.]+)')
+    def employee_reminders(self, request, username=None):
+        from apps.authorize.models import User
+        try:
+            employee = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return response.Response({'error': 'Employee not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        start_param = request.query_params.get('start')
+        end_param = request.query_params.get('end')
+        
+        # Include both employee-specific reminders and global reminders
+        queryset = Reminder.objects.filter(Q(employee=employee) | Q(employee__isnull=True))
+        
+        if start_param and end_param:
+            try:
+                start = datetime.datetime.strptime(start_param, "%Y-%m-%dT%H:%M:%S%z")
+                end = datetime.datetime.strptime(end_param, "%Y-%m-%dT%H:%M:%S%z")
+                queryset = queryset.filter(start__gte=start, end__lte=end)
+            except ValueError:
+                # If parsing fails, return all reminders for the employee
+                pass
+        
+        reminders = ReminderSerializer(queryset, many=True)
+        return response.Response(reminders.data)
 
     def create(self, request, *args, **kwargs):
         data = request.data

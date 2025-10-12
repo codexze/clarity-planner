@@ -9,7 +9,7 @@
           </div>
           <div>
             <h1 class="text-2xl font-bold text-gray-900">Create New Employee</h1>
-            <p class="text-sm text-gray-600">Add a new employee to manage staff and service assignments</p>
+            <p class="text-sm text-gray-600">Add a new employee to manage employee and service assignments</p>
           </div>
         </div>
       </div>
@@ -212,7 +212,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions('staff', ['createEmployee']),
+    ...mapActions('employees', ['createEmployee']),
     handleSubmit() {
       if (!this.form.username || !this.form.first_name || !this.form.last_name || !this.form.email || !this.form.mobile || !this.form.password) {
         this.toastError('Please fill in all required fields');
@@ -222,7 +222,7 @@ export default {
       this.createEmployee(this.form.formData())
         .then((response) => {
           this.toastSuccess(`Employee, ${response.first_name} ${response.last_name}, was created successfully!`);
-          this.$router.push({ path: `/staff/${response.username}/view` });
+          this.$router.push({ path: `/employees/${response.username}/view` });
         })
         .catch((error) => {
           this.toastError('Failed to create employee');

@@ -2,8 +2,8 @@
   <div class="h-[calc(100vh-10rem)]">
     <NewAppointmentModal ref="newAppointmentModal" :selected-event="selectedEvent" @created="handleAppointmentCreated" @error="handleAppointmentError" @cancel="onCancelNewAppointment" />
     <AppointmentModal ref="appointmentModal" @updated="handleAppointmentUpdated" @error="handleAppointmentError" />
-    <NewBlockedModal ref="newBlockedModal" :selected-event="selectedEvent" @error="handleAppointmentError" @cancel="onCancelNewAppointment" />
-    <BlockedModal ref="BlockedModal" :selected-event="selectedEvent" @updated="handleAppointmentUpdated" @error="handleAppointmentError" />
+    <NewBlockedTimeModal ref="newBlockedTimeModal" :selected-event="selectedEvent" @error="handleAppointmentError" @cancel="onCancelNewAppointment" />
+    <BlockedTimeModal ref="BlockedTimeModal" :selected-event="selectedEvent" @updated="handleAppointmentUpdated" @error="handleAppointmentError" />
     <BaseCalendar ref="fullCalendar" :config="config" :class-names="handleEventClassNames" :event-sources="eventSources" @blockmode="handleBlockMode" @select="handleDateSelect" @event-click="handleEventClick" @event-drop="handleEventDrop" @drop="handleDrop" @event-receive="handleEventReceive" @event-resize="handleEventResize" class="h-full" />
   </div>
 </template>
@@ -11,21 +11,22 @@
 <script>
 import store from '@/store';
 import { mapState, mapActions } from 'vuex';
+import session from '@/core/utils/Session';
 
 import BaseCalendar from '@/core/components/calendar/BaseCalendar.vue';
 
 import NewAppointmentModal from '@/core/components/modals/NewAppointmentModal.vue';
 import AppointmentModal from '@/core/components/modals/AppointmentModal.vue';
-import NewBlockedModal from '@/core/components/modals/NewBlockedModal.vue';
-import BlockedModal from '@/core/components/modals/BlockedModal.vue';
+import NewBlockedTimeModal from '@/core/components/modals/NewBlockedTimeModal.vue';
+import BlockedTimeModal from '@/core/components/modals/BlockedTimeModal.vue';
 
 export default {
   components: {
     BaseCalendar,
     NewAppointmentModal,
     AppointmentModal,
-    NewBlockedModal,
-    BlockedModal,
+    NewBlockedTimeModal,
+    BlockedTimeModal,
   },
   data() {
     return {
@@ -34,18 +35,41 @@ export default {
       selectedEvent: null,
     };
   },
-  watch: {},
+  watch: {
+    'employee.username': {
+      handler(newUsername, oldUsername) {
+        if (newUsername && newUsername !== oldUsername) {
+          // Refresh calendar events when employee changes
+          this.$nextTick(() => {
+            if (this.$refs.fullCalendar) {
+              this.$refs.fullCalendar.getApi().refetchEvents();
+            }
+          });
+        }
+      },
+      immediate: false,
+    },
+  },
   computed: {
-    ...mapState('planning', {
+    ...mapState('employees', {
       settings: (state) => state.settings,
       employee: (state) => state.employee,
       employees: (state) => state.employees,
     }),
     defaultSource() {
       return [
-        { id: 'appointments', url: `/api/planning/employees/${this.employee?.username}/appointments/` },
-        { id: 'blocked', url: `/api/planning/employees/${this.employee?.username}/blocked/` },
-        { id: 'reminder', url: `/api/planning/employees/${this.employee?.username}/reminders/` },
+        {
+          id: 'appointments',
+          events: this.fetchAppointments,
+        },
+        {
+          id: 'blocked',
+          events: this.fetchBlockedTime,
+        },
+        {
+          id: 'reminder',
+          events: this.fetchReminders,
+        },
       ];
     },
     eventSources() {
@@ -53,7 +77,66 @@ export default {
     },
   },
   methods: {
-    ...mapActions('planning', ['getConfig', 'getEmployees', 'rescheduleAppointment', 'rescheduleBlocked']),
+    ...mapActions('employees', ['getConfig', 'getEmployees']),
+    ...mapActions('planning', ['rescheduleAppointment', 'rescheduleBlockedTime']),
+
+    // Authenticated event fetch methods
+    async fetchAppointments(info, successCallback, failureCallback) {
+      try {
+        if (!this.employee?.username) {
+          successCallback([]);
+          return;
+        }
+        const response = await session.get(`/api/v1/planning/appointments/employee/${this.employee.username}/`, {
+          params: {
+            start: info.startStr,
+            end: info.endStr,
+          },
+        });
+        successCallback(response.data);
+      } catch (error) {
+        console.error('Failed to fetch appointments:', error);
+        failureCallback(error);
+      }
+    },
+
+    async fetchBlockedTime(info, successCallback, failureCallback) {
+      try {
+        if (!this.employee?.username) {
+          successCallback([]);
+          return;
+        }
+        const response = await session.get(`/api/v1/planning/blocked/employee/${this.employee.username}/`, {
+          params: {
+            start: info.startStr,
+            end: info.endStr,
+          },
+        });
+        successCallback(response.data);
+      } catch (error) {
+        console.error('Failed to fetch blocked time:', error);
+        failureCallback(error);
+      }
+    },
+
+    async fetchReminders(info, successCallback, failureCallback) {
+      try {
+        if (!this.employee?.username) {
+          successCallback([]);
+          return;
+        }
+        const response = await session.get(`/api/v1/planning/reminders/employee/${this.employee.username}/`, {
+          params: {
+            start: info.startStr,
+            end: info.endStr,
+          },
+        });
+        successCallback(response.data);
+      } catch (error) {
+        console.error('Failed to fetch reminders:', error);
+        failureCallback(error);
+      }
+    },
 
     // Modal methods
     getNewAppointmentModal() {
@@ -62,11 +145,11 @@ export default {
     getAppointmentModal() {
       return this.$refs.appointmentModal;
     },
-    getNewBlockedModal() {
-      return this.$refs.newBlockedModal;
+    getNewBlockedTimeModal() {
+      return this.$refs.newBlockedTimeModal;
     },
-    getBlockedModal() {
-      return this.$refs.BlockedModal;
+    getBlockedTimeModal() {
+      return this.$refs.BlockedTimeModal;
     },
 
     handleEventClassNames(args) {
@@ -91,14 +174,14 @@ export default {
     handleDateSelect(selectInfo) {
       this.selectedEvent = selectInfo;
       if (this.blockmode) {
-        this.getNewBlockedModal().toggle();
+        this.getNewBlockedTimeModal().toggle();
       } else {
         this.getNewAppointmentModal().toggle();
       }
     },
     handleEventClick(clickInfo) {
       if (clickInfo.event.source.id === 'blocked') {
-        const modal = this.getBlockedModal();
+        const modal = this.getBlockedTimeModal();
         modal.event = clickInfo.event;
         modal.toggle();
       } else if (clickInfo.event.source.id === 'appointments') {
@@ -122,13 +205,13 @@ export default {
 
     async rescheduleEvent(event) {
       if (event.source.id === 'blocked') {
-        return this.rescheduleBlocked({
+        return this.rescheduleBlockedTime({
           id: event.id,
           start: event.startStr,
           end: event.endStr,
         })
           .then(() => {
-            this.toastSuccess('Blocked time was updated successfully');
+            this.toastSuccess('BlockedTime time was updated successfully');
             this.$refs.fullCalendar.getApi().refetchEvents();
           })
           .catch((error) => {
@@ -202,11 +285,11 @@ export default {
 
   beforeDestroy() {},
   async beforeRouteUpdate(to, from, next) {
-    const employee = await store.dispatch('planning/getEmployeeByUsername', to.params?.username);
+    const employee = await store.dispatch('employees/getEmployeeByUsername', to.params?.username);
     return next();
   },
   async beforeRouteEnter(to, from, next) {
-    const employee = await store.dispatch('planning/getEmployeeByUsername', to.params?.username);
+    const employee = await store.dispatch('employees/getEmployeeByUsername', to.params?.username);
     return next();
   },
 };

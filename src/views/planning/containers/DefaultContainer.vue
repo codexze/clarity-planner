@@ -30,9 +30,9 @@ const navigation = computed(() => [
   { name: 'Calendar', href: `/planning/${user?.username}/calendar`, icon: CalendarIcon, current: router.currentRoute.value.path.includes('calendar') },
   { name: 'Appointments', href: `/planning/${user?.username}/appointments`, icon: ClockIcon, current: router.currentRoute.value.path.includes('appointments') },
   { name: 'Companies', href: '/companies', icon: BuildingOfficeIcon, current: false },
-  { name: 'Clients', href: '/clients', icon: UserGroupIcon, current: router.currentRoute.value.path.includes('clients') },
-  { name: 'Services', href: '/services', icon: WrenchScrewdriverIcon, current: router.currentRoute.value.path.includes('services') },
-  { name: 'Staff', href: '/staff', icon: UsersIcon, current: router.currentRoute.value.path.includes('staff') },
+  { name: 'Clients', href: '/clients', icon: UserGroupIcon, current: false },
+  { name: 'Services', href: '/services', icon: WrenchScrewdriverIcon, current: false },
+  { name: 'Employees', href: '/employees', icon: UsersIcon, current: false },
 ]);
 const userNavigation = [
   { name: 'Account', href: '/account', icon: UserIcon },

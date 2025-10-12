@@ -293,12 +293,12 @@ export default {
   },
   computed: {},
   methods: {
-    ...mapActions('clients', ['getReminderReasons', 'getReminders']),
-    ...mapActions('planning', ['createReminder', 'updateReminder', 'deleteReminder']),
+    ...mapActions('clients', ['getClientReminders']),
+    ...mapActions('planning', ['getReminderReasons', 'createReminder', 'updateReminder', 'deleteReminder']),
 
     itemProvider() {
       this.loading = true;
-      this.getReminders(this.client.id)
+      this.getClientReminders(this.client.id)
         .then((response) => {
           this.reminders = response;
         })

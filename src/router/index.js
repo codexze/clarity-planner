@@ -10,7 +10,7 @@ import serviceRoutes from './modules/services';
 import companyRoutes from './modules/companies';
 import clientRoutes from './modules/clients';
 import planningRoutes from './modules/planning';
-import staffRoutes from './modules/staff';
+import employeesRoutes from './modules/employees';
 
 const redirectLogout = (to, from, next) => {
   const store = useStore();
@@ -51,7 +51,7 @@ const baseRoutes = [
 	
 ];
 
-const routes = baseRoutes.concat(serviceRoutes, companyRoutes, clientRoutes, planningRoutes, staffRoutes);
+const routes = baseRoutes.concat(serviceRoutes, companyRoutes, clientRoutes, planningRoutes, employeesRoutes);
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),

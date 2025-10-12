@@ -2,14 +2,14 @@
   <div class="p-8">
     <!-- Header Section -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Staff Management</h1>
-      <p class="mt-2 text-gray-600">Manage your staff and their details</p>
+      <h1 class="text-3xl font-bold text-gray-900">Employee Management</h1>
+      <p class="mt-2 text-gray-600">Manage your employee and their details</p>
     </div>
 
     <div class="relative overflow-x-auto p-4 bg-white shadow-md sm:rounded-lg">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <router-link to="/staff/new" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+          <router-link to="/employees/new" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
             <font-awesome-icon :icon="['fas', 'plus']" class="mr-2" />
             New Employee
           </router-link>
@@ -52,7 +52,7 @@
       </div>
     </div>
 
-    <!-- Staff Table -->
+    <!-- Employee Table -->
     <div class="mt-6 relative overflow-x-auto bg-white shadow-md sm:rounded-lg">
       <div v-if="loading" class="flex justify-center py-8">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -81,7 +81,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="employee in staff" :key="employee.id" class="bg-white border-b border-gray-200 hover:bg-gray-50">
+            <tr v-for="employee in employee" :key="employee.id" class="bg-white border-b border-gray-200 hover:bg-gray-50">
               <td class="px-6 py-4 font-medium text-gray-900">
                 <div class="flex items-center">
                   <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
@@ -113,7 +113,7 @@
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center space-x-2">
-                  <router-link :to="`/staff/${employee.username}/view`" class="text-blue-600 hover:text-blue-800">
+                  <router-link :to="`/employees/${employee.username}/view`" class="text-blue-600 hover:text-blue-800">
                     <font-awesome-icon :icon="['fas', 'eye']" />
                   </router-link>
                   <button @click="toggleStatus(employee)" :class="employee.is_active ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'">
@@ -122,11 +122,11 @@
                 </div>
               </td>
             </tr>
-            <tr v-if="staff.length === 0">
+            <tr v-if="employee.length === 0">
               <td colspan="6" class="px-6 py-8 text-center text-gray-500">
                 <font-awesome-icon :icon="['fas', 'users']" class="text-4xl text-gray-300 mb-2" />
-                <p>No staff found</p>
-                <!-- <router-link to="/staff/new" class="text-blue-600 hover:text-blue-800">Create your first employee</router-link> -->
+                <p>No employee found</p>
+                <!-- <router-link to="/employees/new" class="text-blue-600 hover:text-blue-800">Create your first employee</router-link> -->
               </td>
             </tr>
           </tbody>
@@ -134,7 +134,7 @@
 
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="flex items-center justify-between px-6 py-3 bg-gray-50">
-          <div class="text-sm text-gray-700">Showing {{ staff.length }} of {{ count }} staff</div>
+          <div class="text-sm text-gray-700">Showing {{ employee.length }} of {{ count }} employee</div>
           <div class="flex space-x-2">
             <button @click="previousPage" :disabled="isFirstPage" class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 border border-transparent rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-500">Previous</button>
             <span class="px-3 py-1 text-sm">{{ currentPage }} / {{ totalPages }}</span>
@@ -166,7 +166,7 @@ export default {
         is_active: null,
       },
       sortOrder: 'asc',
-      staff: [],
+      employee: [],
       debouncedFilter: null,
     };
   },
@@ -182,10 +182,10 @@ export default {
     },
   },
   methods: {
-    ...mapActions('staff', ['filterStaff', 'updateEmployeeById']),
+    ...mapActions('employees', ['filterEmployees', 'updateEmployeeById']),
     itemProvider() {
       this.loading = true;
-      this.filterStaff({
+      this.filterEmployees({
         page: this.currentPage,
         page_size: this.pageSize,
         ordering: this.sorting,
@@ -195,7 +195,7 @@ export default {
         is_active: this.filters.is_active !== null ? this.filters.is_active : undefined,
       })
         .then((response) => {
-          this.staff = response.results || response;
+          this.employee = response.results || response;
           this.count = response.count || response.length;
           this.totalPages = Math.ceil(this.count / this.pageSize);
         })

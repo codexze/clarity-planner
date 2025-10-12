@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CalendarSettings, Appointment
+from .models import CalendarSettings, Appointment, BlockedTime
 
 
 class CalendarSettingsAdmin(admin.ModelAdmin):
@@ -31,9 +31,21 @@ class AppointmentAdmin(admin.ModelAdmin):
         obj.set_record(request.user, change)
         super().save_model(request, obj, form, change)
 
+class BlockedTimeAdmin(admin.ModelAdmin):
+    list_display = ["start", "end", "employee", "reason"]
+    list_filter = ["employee"]
+    search_fields = ["start", "end", "employee", "reason"]
+    fieldsets = (
+        ("Blocked Time Information", {"fields": ("employee", "start", "end", "reason")}),
+    )
+
+    def save_model(self, request, obj, form, change):
+        obj.set_record(request.user, change)
+        super().save_model(request, obj, form, change)
+
 admin.site.register(CalendarSettings, CalendarSettingsAdmin)
 admin.site.register(Appointment, AppointmentAdmin)
-
+admin.site.register(BlockedTime, BlockedTimeAdmin)
 
 
 

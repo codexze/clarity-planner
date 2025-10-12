@@ -31,7 +31,7 @@ def start(cmd):
     cmd.stdout.write(cmd.style.SUCCESS( 'Creating user: employeea'), ending='\n')
     user, created = User.objects.get_or_create(username='employeea')
     if created:
-        user.first_name = "Emplyee A"
+        user.first_name = "Amber"
         user.last_name = "Clarity"
         user.email = "a.employee@clarity.sr"
         user.set_password('admin1')
@@ -43,7 +43,7 @@ def start(cmd):
     cmd.stdout.write(cmd.style.SUCCESS( 'Creating user: employeeb'), ending='\n')
     user, created = User.objects.get_or_create(username='employeeb')
     if created:
-        user.first_name = "Employee B"
+        user.first_name = "Blue"
         user.last_name = "Clarity"
         user.email = "b.employee@clarity.sr"
         user.set_password('admin1')

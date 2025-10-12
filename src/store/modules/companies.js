@@ -21,22 +21,22 @@ const mutations = {
 
 const actions = {
   async getCompanies({ commit }) {
-    const companies = await session.get('api/clients/companies/all/');
+    const companies = await session.get('api/v1/clients/companies/all/');
     commit('SET_COMPANIES', companies.data);
     return companies.data;
   },
   async getCompanyById({ commit }, id) {
-    const company = await session.get(`api/clients/companies/${id}/`);
+    const company = await session.get(`api/v1/clients/companies/${id}/`);
     commit('SET_COMPANY', company.data);
     return company.data;
   },
   async filterCompanies({ commit }, params) {
-    const companies = await session.get('api/clients/companies/filter/', { params: params });
+    const companies = await session.get('api/v1/clients/companies/filter/', { params: params });
     return companies.data;
   },
   createCompany({ commit }, data) {
     return session
-      .post(`api/clients/companies/`, data)
+      .post(`api/v1/clients/companies/`, data)
       .then((response) => {
         return response.data;
       })
@@ -44,7 +44,7 @@ const actions = {
   },
   updateCompanyById({ commit }, data) {
     return session
-      .put(`api/clients/companies/${data.id}/`, data)
+      .put(`api/v1/clients/companies/${data.id}/`, data)
       .then((response) => {
         commit('SET_COMPANY', response.data);
         return response.data;
@@ -53,7 +53,7 @@ const actions = {
   },
   deleteCompanyById({ commit }, id) {
     return session
-      .delete(`api/clients/companies/${id}/`)
+      .delete(`api/v1/clients/companies/${id}/`)
       .then((response) => {
         return response.data;
       })

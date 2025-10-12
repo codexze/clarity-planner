@@ -230,7 +230,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('staff', {
+    ...mapState('employees', {
       employee: (state) => state.employee,
     }),
     ...mapState('services', {
@@ -268,17 +268,17 @@ export default {
     },
   },
   methods: {
-    ...mapActions('staff', ['updateEmployeeByUsername']),
+    ...mapActions('employees', ['updateEmployeeByUsername']),
     handleSubmit() {
       this.updateEmployeeByUsername(this.form.formData()).then((response) => {
-        store.commit('staff/SET_EMPLOYEE', response);
+        store.commit('employees/SET_EMPLOYEE', response);
         this.toastSuccess(`Employee, ${this.employee.name}, was updated successfully!`);
         // console.log(response);
       });
       // console.log(this.form.formData());
     },
     cancel() {
-      this.$router.push({ path: '/staff' });
+      this.$router.push({ path: '/employees' });
     },
     selectAllServices() {
       if (this.types && this.types.length > 0) {
@@ -350,13 +350,13 @@ export default {
     }
   },
   async beforeRouteEnter(to, from, next) {
-    const employee = await store.dispatch('staff/getEmployeeByUsername', to.params.employeeId);
+    const employee = await store.dispatch('employees/getEmployeeByUsername', to.params.employeeId);
     const types = await store.dispatch('services/getServiceTypes');
     // to.meta.label = `${employee.name}`;
     return next();
   },
   beforeDestroy() {
-    store.commit('staff/SET_EMPLOYEE', null);
+    store.commit('employees/SET_EMPLOYEE', null);
   },
 };
 </script>

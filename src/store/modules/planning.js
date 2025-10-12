@@ -1,29 +1,12 @@
 import session from '@/core/utils/Session';
 import moment from 'moment';
 const state = {
-  settings: {
-    calendar: {},
-    days: [],
-    events: [],
-  },
-  employee: {},
-  employees: [],
-
   appointment: null,
 };
 
 const getters = {};
 
 const mutations = {
-  SET_SETTINGS(state, obj) {
-    state.settings[obj.key] = obj.value;
-  },
-  SET_EMPLOYEE(state, employee) {
-    state.employee = employee;
-  },
-  SET_EMPLOYEES(state, employees) {
-    state.employees = employees;
-  },
   SET_APPOINTMENT(state, appointment) {
     state.appointment = appointment;
   },
@@ -45,45 +28,46 @@ const actions = {
       resolve(it);
     });
   },
-  async getConfig({ state, commit }) {
-    const config = await session.get(`api/planning/employees/${state.employee?.username}/config/`);
-    commit('SET_SETTINGS', { key: 'calendar', value: config.data });
-    return config.data;
-  },
-  async getEmployeeByUsername({ commit }, username) {
-    const employee = await session.get(`api/planning/employees/${username}/`);
-    commit('SET_EMPLOYEE', employee.data);
-    return employee.data;
-  },
-  async getEmployees({ commit }) {
-    const employees = await session.get(`api/planning/employees/limited/`);
-    commit('SET_EMPLOYEES', employees.data);
-    return employees.data;
-  },
   async filterAppointments({ commit }, params) {
-    const appointments = await session.get('api/planning/appointments/filter/', { params: params });
+    const appointments = await session.get('api/v1/planning/appointments/filter/', { params: params });
+    return appointments.data;
+  },
+  async getAppointmentsByEmployee({ commit }, username) {
+    const appointments = await session.get(`api/v1/planning/appointments/employee/${username}/`);
     return appointments.data;
   },
   async getAppointmentById({ commit }, id) {
-    const appointment = await session.get(`api/planning/appointments/${id}/`);
+    const appointment = await session.get(`api/v1/planning/appointments/${id}/`);
     commit('SET_APPOINTMENT', appointment.data);
     return appointment.data;
   },
-  async filterReminder({ commit }, params) {
-    const reminders = await session.get('api/planning/reminders/filter/', { params: params });
-    return reminders.data;
-  },
-  async getBlockedById({ commit }, id) {
-    const blocked = await session.get(`api/planning/blocked/${id}/`);
+  async getBlockedTimeByEmployee({ commit }, username) {
+    const blocked = await session.get(`api/v1/planning/blocked/employee/${username}/`);
     return blocked.data;
   },
+  async getBlockedTimeById({ commit }, id) {
+    const blocked = await session.get(`api/v1/planning/blocked/${id}/`);
+    return blocked.data;
+  },
+  async getReminderReasons({ commit }) {
+    const reasons = await session.get('api/v1/planning/reminders/reasons/');
+    return reasons.data;
+  },
+  async getRemindersByEmployee({ commit }, username) {
+    const reminders = await session.get(`api/v1/planning/reminders/employee/${username}/`);
+    return reminders.data;
+  },
+  async getReminderById({ commit }, id) {
+    const reminder = await session.get(`api/v1/planning/reminders/${id}/`);
+    return reminder.data;
+  },
   async filterReminders({ commit }, params) {
-    const reminders = await session.get('api/planning/reminders/filter/', { params: params });
+    const reminders = await session.get('api/v1/planning/reminders/filter/', { params: params });
     return reminders.data;
   },
   createAppointment({ commit }, data) {
     return session
-      .post(`api/planning/appointments/`, data)
+      .post(`api/v1/planning/appointments/`, data)
       .then((response) => {
         return response.data;
       })
@@ -91,7 +75,7 @@ const actions = {
   },
   rescheduleAppointment({ commit }, data) {
     return session
-      .put(`api/planning/appointments/${data.id}/reschedule/`, data)
+      .put(`api/v1/planning/appointments/${data.id}/reschedule/`, data)
       .then((response) => {
         return response.data;
       })
@@ -99,31 +83,31 @@ const actions = {
   },
   updateAppointment({ commit }, data) {
     return session
-      .put(`api/planning/appointments/${data.id}/`, data)
+      .put(`api/v1/planning/appointments/${data.id}/`, data)
       .then((response) => {
         return response.data;
       })
       .finally(() => {});
   },
-  createBlocked({ commit }, data) {
+  createBlockedTime({ commit }, data) {
     return session
-      .post(`api/planning/blocked/`, data)
+      .post(`api/v1/planning/blocked/`, data)
       .then((response) => {
         return response.data;
       })
       .finally(() => {});
   },
-  rescheduleBlocked({ commit }, data) {
+  rescheduleBlockedTime({ commit }, data) {
     return session
-      .put(`api/planning/blocked/${data.id}/reschedule/`, data)
+      .put(`api/v1/planning/blocked/${data.id}/reschedule/`, data)
       .then((response) => {
         return response.data;
       })
       .finally(() => {});
   },
-  updateBlocked({ commit }, data) {
+  updateBlockedTime({ commit }, data) {
     return session
-      .put(`api/planning/blocked/${data.id}/`, data)
+      .put(`api/v1/planning/blocked/${data.id}/`, data)
       .then((response) => {
         return response.data;
       })
@@ -131,7 +115,7 @@ const actions = {
   },
   createReminder({ commit }, data) {
     return session
-      .post(`api/planning/reminders/`, data)
+      .post(`api/v1/planning/reminders/`, data)
       .then((response) => {
         return response.data;
       })
@@ -139,7 +123,7 @@ const actions = {
   },
   updateReminder({ commit }, data) {
     return session
-      .put(`api/planning/reminders/${data.id}/`, data)
+      .put(`api/v1/planning/reminders/${data.id}/`, data)
       .then((response) => {
         return response.data;
       })
@@ -147,7 +131,7 @@ const actions = {
   },
   deleteReminder({ commit }, id) {
     return session
-      .delete(`api/planning/reminders/${id}/`)
+      .delete(`api/v1/planning/reminders/${id}/`)
       .then((response) => {
         return response.data;
       })

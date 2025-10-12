@@ -1,24 +1,13 @@
 from rest_framework import serializers
 
-from .models import CalendarEventSlot, CalendarSettings, Appointment, Blocked, Reminder
-
-class CalendarEventSlotSerializer(serializers.ModelSerializer):
-    title = serializers.ReadOnlyField()
-    
-    class Meta:
-        model = CalendarEventSlot
-        fields = '__all__'
+from .models import CalendarSettings, Appointment, BlockedTime, Reminder
 
 class CalendarConfigSerializer(serializers.ModelSerializer):
-    event_slots = CalendarEventSlotSerializer(many=True, read_only=True)
-    
     class Meta:
         model = CalendarSettings
         fields = '__all__'
 
     def to_representation(self, instance):
-        event_slots = CalendarEventSlotSerializer(instance.event_slots, many=True)
-
         business_hours = []
         for business_hour in instance.business_hours:
             business_hours.append({
@@ -41,13 +30,10 @@ class CalendarConfigSerializer(serializers.ModelSerializer):
                 'MIN': instance.current_day_hours[0],
                 'MAX': instance.current_day_hours[1],
             },
-            'events': event_slots.data,
             'default_view': instance.default_view,
             'options': {
-                # 'slotLabelInterval': 20,
                 'slotMinTime': instance.current_day_hours[0],
                 'slotMaxTime': instance.current_day_hours[1],
-                # 'slotDuration': 20,
                 
                 'businessHours': business_hours
             }
@@ -142,7 +128,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         return data
     
 
-class BlockedSerializer(serializers.ModelSerializer):
+class BlockedTimeSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     backgroundColor = serializers.SerializerMethodField()
     borderColor = serializers.SerializerMethodField()
@@ -152,7 +138,7 @@ class BlockedSerializer(serializers.ModelSerializer):
     end_time = serializers.SerializerMethodField()
 
     class Meta:
-        model = Blocked
+        model = BlockedTime
         fields = '__all__'
 
     def get_appointment_date(self, obj):

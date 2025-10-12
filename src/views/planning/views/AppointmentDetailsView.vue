@@ -6,7 +6,7 @@
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-              <font-awesome-icon :icon="['fas', 'calendar-clock']" class="mr-3 text-blue-600" />
+              <font-awesome-icon :icon="['fas', 'calendar']" class="mr-3 text-blue-600" />
               Schedule & Timing
             </h3>
             <p class="mt-1 text-sm text-gray-600">Set the appointment date and duration</p>
@@ -233,6 +233,24 @@
             </div>
           </div>
         </div>
+
+        <div class="mt-6 flex items-center justify-between">
+          <div class="text-sm text-gray-600">
+            <font-awesome-icon :icon="['fas', 'info-circle']" class="mr-1.5 text-blue-500" />
+            Changes will be saved to the appointment once you click "Save Changes"
+          </div>
+          <!-- Form Actions -->
+          <div class="flex items-center space-x-4">
+            <button @click="handleSubmit" :disabled="!form.dirty()" class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 border border-transparent rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed space-x-2">
+              <font-awesome-icon :icon="['fas', 'save']" />
+              <span>Save Changes</span>
+            </button>
+            <button @click="cancel" class="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-150 flex items-center space-x-2">
+              <font-awesome-icon :icon="['fas', 'times']" />
+              <span>Cancel</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="sm:col-span-3 sm:col-start-4">
@@ -413,18 +431,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Footer Actions -->
-    <div class="py-6 flex items-center space-x-4">
-      <button @click="handleSubmit" class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 border border-transparent rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg transition-all duration-200">
-        <font-awesome-icon :icon="['fas', 'save']" />
-        Save Changes
-      </button>
-      <button @click="cancel" class="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
-        <font-awesome-icon :icon="['fas', 'times']" />
-        Cancel
-      </button>
-    </div>
   </div>
 </template>
 
@@ -593,8 +599,8 @@ export default {
   methods: {
     ...mapActions('clients', ['getClientById']),
     ...mapActions('services', ['getServiceById', 'getServicesByType', 'getAddonsByType']),
-    ...mapActions('staff', ['getEmployeesByServiceType']),
-    ...mapActions('planning', ['getConfig', 'loadIntervalTime', 'updateAppointment']),
+    ...mapActions('employees', ['getConfig', 'getEmployeesByServiceType']),
+    ...mapActions('planning', ['loadIntervalTime', 'updateAppointment']),
     toggle() {
       this.visible = !this.visible;
     },
@@ -691,15 +697,17 @@ export default {
     },
   },
   async created() {
+    console.log('HERE');
     this.config = await this.getConfig();
     this.intervalTime = await this.loadIntervalTime({
-      start: this.config.slot.MIN,
-      end: this.config.slot.MAX,
-      interval: this.config.slot.INTERVAL,
+      start: this.config?.slot.MIN,
+      end: this.config?.slot.MAX,
+      interval: this.config?.slot.INTERVAL,
     });
   },
   async beforeRouteEnter(to, from, next) {
-    const employee = await store.dispatch('planning/getEmployeeByUsername', to.params?.username);
+    console.log('THERE');
+    const employee = await store.dispatch('employees/getEmployeeByUsername', to.params?.username);
     const appointment = await store.dispatch('planning/getAppointmentById', to.params.appointmentId);
     const serviceTypes = await store.dispatch('services/getServiceTypes');
 

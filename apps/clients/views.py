@@ -7,23 +7,15 @@ from django.db.models import Q
 
 from apps.planning.views import AppointmentFilter
 from apps.planning.serializers import ReminderSerializer
-from apps.planning.models import Appointment, Reminder, ReminderReason
+from apps.planning.models import Appointment, Reminder
 
 from .models import Gender, Client, KnownAddress, Company
 from .serializers import ClientSerializer, KnownAddressSerializer, AppointmentSerializer, CompanySerializer
 
-class ReminderReasonView(viewsets.ViewSet):
-    def list(self, request):
-        choices = [{"value": choice.value, "label": choice.label} for choice in ReminderReason]
-        return response.Response(choices)
-        
-    
 class GenderView(viewsets.ViewSet):
     def list(self, request):
         choices = [{"value": choice.value, "label": choice.label} for choice in Gender]
         return response.Response(choices)
-
-
 
 class Pagination(pagination.PageNumberPagination):
     page_size = 10  # Number of items per page
@@ -31,15 +23,15 @@ class Pagination(pagination.PageNumberPagination):
     max_page_size = 100  # Prevent very large page sizes
 
 class CompanyFilter(filters.FilterSet):
-    name = filters.CharFilter(field_name='name', label="Search Name")
-    email = filters.CharFilter(field_name='email', lookup_expr='icontains')
-    mobile = filters.CharFilter(field_name='mobile', lookup_expr='startswith')
     ordering = filters.CharFilter(method='order', label="Order By")
 
     class Meta:
         model = Company
         fields = {
-            'is_active': ['exact'],  # Active services only
+            'name': ['icontains'],
+            'email': ['icontains'],
+            'phone': ['startswith'],
+            'is_active': ['exact'],
         }
 
     def order(self, queryset, name, value):
@@ -47,12 +39,11 @@ class CompanyFilter(filters.FilterSet):
     
 class CompanyView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
-
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = CompanyFilter
-    pagination_class = Pagination  # Enable pagination
+    pagination_class = Pagination
 
     def get_queryset(self):
         queryset = Company.objects.all()
@@ -79,18 +70,17 @@ class CompanyView(viewsets.ModelViewSet):
 
 class ClientFilter(filters.FilterSet):
     name = filters.CharFilter(method='filter_name', label="Search Name")
-    date_of_birth = filters.CharFilter(method='filter_date_of_birth')
-    email = filters.CharFilter(field_name='email', lookup_expr='icontains')
-    mobile = filters.CharFilter(field_name='mobile', lookup_expr='startswith')
-    gender = filters.CharFilter(field_name='gender', lookup_expr='iexact')
-    company = filters.NumberFilter(field_name='company', lookup_expr='exact')
+    date_of_birth = filters.CharFilter(method='filter_date_of_birth', label="Search Date of Birth")
     ordering = filters.CharFilter(method='order', label="Order By")
 
     class Meta:
         model = Client
         fields = {
-            'gender': ['exact'],  # Filter by exact match
-            'is_active': ['exact'],  # Active services only
+            'email': ['icontains'],
+            'mobile': ['startswith'],
+            'gender': ['exact'],  
+            'company': ['exact'],
+            'is_active': ['exact'], 
         }
 
     def filter_name(self, queryset, name, value):
@@ -99,7 +89,6 @@ class ClientFilter(filters.FilterSet):
 
     def filter_date_of_birth(self, queryset, name, value):
         try:
-            # Try common date formats
             for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%m/%d/%Y', '%d-%m-%Y', '%d%m%Y']:
                 try:
                     date = datetime.datetime.strptime(value, fmt).date()
@@ -120,12 +109,11 @@ class ClientFilter(filters.FilterSet):
 
 class ClientView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
-
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = ClientFilter
-    pagination_class = Pagination  # Enable pagination
+    pagination_class = Pagination
 
     def get_queryset(self):
         queryset = Client.objects.all()
@@ -195,15 +183,14 @@ class ClientView(viewsets.ModelViewSet):
     
 
 class KnownAddressFilter(filters.FilterSet):
-    client_id = filters.NumberFilter(field_name='client__id', lookup_expr='exact')
-    address = filters.CharFilter(field_name='address', lookup_expr='icontains')
-    is_active = filters.BooleanFilter(field_name='is_active')
     ordering = filters.CharFilter(method='order', label="Order By")
 
     class Meta:
         model = KnownAddress
         fields = {
-            'is_active': ['exact'],  # Active addresses only
+            'client': ['exact'],
+            'address': ['icontains'],
+            'is_active': ['exact'],
         }
     
     def order(self, queryset, name, value):
@@ -211,12 +198,11 @@ class KnownAddressFilter(filters.FilterSet):
     
 class KnownAddressView(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
-
     queryset = KnownAddress.objects.all()
     serializer_class = KnownAddressSerializer
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = KnownAddressFilter
-    pagination_class = Pagination  # Enable pagination
+    pagination_class = Pagination
 
     def get_queryset(self):
         queryset = KnownAddress.objects.all()

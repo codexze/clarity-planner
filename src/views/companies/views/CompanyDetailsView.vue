@@ -18,6 +18,7 @@
               <label for="name" class="flex items-center text-sm font-medium text-gray-900">
                 <font-awesome-icon :icon="['fas', 'building']" class="mr-2 text-gray-400" />
                 Company Name
+                <span class="text-red-500 ml-1">*</span>
               </label>
               <div class="relative">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">

@@ -28,7 +28,7 @@ const navigation = [
   { name: 'Companies', href: '/companies', icon: BuildingOfficeIcon, current: false },
   { name: 'Clients', href: '/clients', icon: UserGroupIcon, current: false },
   { name: 'Services', href: '/services', icon: WrenchScrewdriverIcon, current: true },
-  { name: 'Staff', href: '/staff', icon: UsersIcon, current: false },
+  { name: 'Employees', href: '/employees', icon: UsersIcon, current: false },
 ];
 const userNavigation = [
   { name: 'Account', href: '/account', icon: UserIcon },

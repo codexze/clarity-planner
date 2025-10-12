@@ -35,7 +35,7 @@
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
                       <div class="px-6 py-4 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                          <font-awesome-icon :icon="['fas', 'calendar-clock']" class="mr-3 text-blue-600" />
+                          <font-awesome-icon :icon="['fas', 'calendar']" class="mr-3 text-blue-600" />
                           Schedule & Timing
                         </h3>
                         <p class="mt-1 text-sm text-gray-600">Set the appointment date and duration</p>
@@ -653,8 +653,8 @@ export default {
   methods: {
     ...mapActions('clients', ['getClientById']),
     ...mapActions('services', ['getServiceById', 'getServiceTypes', 'getServicesByType', 'getAddonsByType']),
-    ...mapActions('staff', ['getEmployeesByServiceType']),
-    ...mapActions('planning', ['getConfig', 'loadIntervalTime', 'updateAppointment']),
+    ...mapActions('employees', ['getConfig', 'getEmployeesByServiceType']),
+    ...mapActions('planning', ['loadIntervalTime', 'updateAppointment']),
     toggle() {
       this.visible = !this.visible;
     },
@@ -756,9 +756,9 @@ export default {
   async mounted() {
     this.config = await this.getConfig();
     this.intervalTime = await this.loadIntervalTime({
-      start: this.config.slot.MIN,
-      end: this.config.slot.MAX,
-      interval: this.config.slot.INTERVAL,
+      start: this.config?.slot.MIN,
+      end: this.config?.slot.MAX,
+      interval: this.config?.slot.INTERVAL,
     });
 
     this.serviceTypes = await this.getServiceTypes();

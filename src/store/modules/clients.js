@@ -28,40 +28,36 @@ const mutations = {
 };
 
 const actions = {
-  async getReminderReasons({ commit }) {
-    const reasons = await session.get('api/clients/reminder-reason/');
-    return reasons.data;
-  },
   async getGenders({ commit }) {
-    const genders = await session.get('api/clients/genders/');
+    const genders = await session.get('api/v1/clients/genders/');
     commit('SET_GENDERS', genders.data);
     return genders.data;
   },
   async filterKnownAddresses({ commit }, params) {
-    const addresses = await session.get('api/clients/known-addresses/filter/', { params: params });
+    const addresses = await session.get('api/v1/clients/known-addresses/filter/', { params: params });
     return addresses.data;
   },
-  async getReminders({ commit }, id) {
-    const reminders = await session.get(`api/clients/base/${id}/reminders/`);
+  async getClientReminders({ commit }, id) {
+    const reminders = await session.get(`api/v1/clients/clients/${id}/reminders/`);
     return reminders.data;
   },
   async getClients({ commit }) {
-    const clients = await session.get('api/clients/base/');
+    const clients = await session.get('api/v1/clients/clients/');
     commit('SET_CLIENTS', clients.data);
     return clients.data;
   },
   async getClientById({ commit }, id) {
-    const client = await session.get(`api/clients/base/${id}`);
+    const client = await session.get(`api/v1/clients/clients/${id}`);
     commit('SET_CLIENT', client.data);
     return client.data;
   },
   async filterClients({ commit }, params) {
-    const clients = await session.get('api/clients/base/filter/', { params: params });
+    const clients = await session.get('api/v1/clients/clients/filter/', { params: params });
     return clients.data;
   },
   createClient({ commit }, data) {
     return session
-      .post(`api/clients/base/`, data)
+      .post(`api/v1/clients/clients/`, data)
       .then((response) => {
         return response.data;
       })
@@ -69,7 +65,7 @@ const actions = {
   },
   updateClientById({ commit }, data) {
     return session
-      .put(`api/clients/base/${data.id}/`, data)
+      .put(`api/v1/clients/clients/${data.id}/`, data)
       .then((response) => {
         commit('SET_CLIENT', response.data);
         return response.data;
@@ -77,12 +73,12 @@ const actions = {
       .finally(() => {});
   },
   async filterClientAppointments({ commit }, params) {
-    const appointments = await session.get(`api/clients/base/${params.client_id}/appointments/`, { params: params });
+    const appointments = await session.get(`api/v1/clients/clients/${params.client_id}/appointments/`, { params: params });
     return appointments.data;
   },
   updateKnownAddress({ commit }, data) {
     return session
-      .patch(`api/clients/known-addresses/${data.id}/set_active/`, data)
+      .patch(`api/v1/clients/known-addresses/${data.id}/set_active/`, data)
       .then((response) => {
         return response.data;
       })
