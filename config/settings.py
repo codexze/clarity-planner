@@ -15,20 +15,31 @@ from pathlib import Path
 
 root = environ.Path(__file__) - 2  # Project Root
 env = environ.Env()
-environ.Env.read_env(root('.env'))
+
+# Load environment-specific .env file
+import os
+environment = os.environ.get('DJANGO_ENV', 'development')
+
+if environment == 'production':
+    environ.Env.read_env(root('.env.production'))
+elif environment == 'development':
+    environ.Env.read_env(root('.env.local'))
+else:
+    # Fallback to default .env file
+    environ.Env.read_env(root('.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'b7u+(a^pjc!vsz3$8ifm6bz#7hylhodc6c5h)9a=%esvyl%*pc'
+SECRET_KEY = env('SECRET_KEY', default='b7u+(a^pjc!vsz3$8ifm6bz#7hylhodc6c5h)9a=%esvyl%*pc')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=True)
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1']
-CORS_ALLOWED_ORIGINS=["http://localhost:8080",]
-CSRF_TRUSTED_ORIGINS=["http://localhost:8080",]
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=["http://localhost:8080"])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=["http://localhost:8080"])
 
 # Application definition
 
@@ -109,16 +120,16 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': env.int('PAGE_SIZE', default=10),
 }
 
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=45),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=env.int('ACCESS_TOKEN_LIFETIME_HOURS', default=1)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=env.int('REFRESH_TOKEN_LIFETIME_MINUTES', default=45)),
+    'ROTATE_REFRESH_TOKENS': env.bool('ROTATE_REFRESH_TOKENS', default=True),
+    'BLACKLIST_AFTER_ROTATION': env.bool('BLACKLIST_AFTER_ROTATION', default=True),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
@@ -146,13 +157,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = env('LANGUAGE_CODE', default='en-us')
 
-TIME_ZONE = "America/Paramaribo"
+TIME_ZONE = env('TIME_ZONE', default="America/Paramaribo")
 
-USE_I18N = True
-USE_L10N = False
-USE_TZ = True
+USE_I18N = env.bool('USE_I18N', default=True)
+USE_L10N = env.bool('USE_L10N', default=False)
+USE_TZ = env.bool('USE_TZ', default=True)
 
 
 # Static files (CSS, JavaScript, Images)

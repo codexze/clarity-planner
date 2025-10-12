@@ -4,8 +4,10 @@ package-lock.json
 /dist
 /jsons
 
-# local env files
+# Environment files (keep .env.example)
+.env
 .env.local
+.env.production
 .env.*.local
 
 # Log files
