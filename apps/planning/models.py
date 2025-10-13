@@ -16,7 +16,7 @@ class CalendarViews(models.TextChoices):
     MONTH = 'dayGridMonth'
 
 class CalendarSettings(Subrecord):
-    default_view = models.CharField(default=CalendarViews.WEEK, choices=CalendarViews.choices)
+    default_view = models.CharField(max_length=20, default=CalendarViews.WEEK, choices=CalendarViews.choices)
     enable_weekends = models.BooleanField(default=False)
     business_hours = models.JSONField(default=list)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -287,7 +287,7 @@ class Reminder(Slot, Subrecord):
     global_reminder = models.BooleanField(default=False)
     employee = models.ForeignKey(User, blank=True, null=True, related_name='reminders', on_delete=models.CASCADE)
     client = models.ForeignKey(Client, related_name='reminder', on_delete=models.CASCADE)
-    reason = models.CharField(choices=ReminderReason.choices, default=ReminderReason.other)
+    reason = models.CharField(max_length=50, choices=ReminderReason.choices, default=ReminderReason.other)
     other_reason = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:

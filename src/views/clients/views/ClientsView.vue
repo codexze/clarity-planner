@@ -90,8 +90,8 @@
                   <div>
                     <p class="font-medium">{{ client.display }}</p>
                     <div class="flex items-center space-x-1">
-                      <font-awesome-icon v-if="client.company_details" :icon="['fas', 'building']" class="text-gray-400 text-xs" />
-                      <span v-if="client.company_details" class="text-xs text-gray-500">{{ client.company_details.name }}</span>
+                      <font-awesome-icon v-if="client.company" :icon="['fas', 'building']" class="text-gray-400 text-xs" />
+                      <span v-if="client.company" class="text-xs text-gray-500">{{ client.company_name }}</span>
                     </div>
                   </div>
                 </div>

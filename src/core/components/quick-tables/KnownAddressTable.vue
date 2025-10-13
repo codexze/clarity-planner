@@ -64,22 +64,22 @@
 
               <!-- Appointment Status -->
               <div class="bg-white rounded-lg p-3 border border-gray-100">
-                <div v-if="address.appointment?.is_past" class="flex items-center space-x-3">
+                <div v-if="address.last_appointment_date" class="flex items-center space-x-3">
                   <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
                     <font-awesome-icon icon="history" class="text-red-600 text-sm" />
                   </div>
                   <div>
                     <p class="text-sm font-medium text-gray-900">Last Appointment</p>
-                    <p class="text-xs text-gray-500">{{ address.appointment?.appointment_date ? toLocaleDate(address.appointment?.appointment_date) : 'Date not available' }}</p>
+                    <p class="text-xs text-gray-500">{{ address.last_appointment_date ? toLocaleDate(address.last_appointment_date) : 'Date not available' }}</p>
                   </div>
                 </div>
-                <div v-else-if="address.appointment?.is_future" class="flex items-center space-x-3">
+                <div v-else-if="address.next_appointment_date" class="flex items-center space-x-3">
                   <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
                     <font-awesome-icon icon="calendar" class="text-green-600 text-sm" />
                   </div>
                   <div>
                     <p class="text-sm font-medium text-gray-900">Next Appointment</p>
-                    <p class="text-xs text-gray-500">{{ address.appointment?.appointment_date ? toLocaleDate(address.appointment?.appointment_date) : 'Date not available' }}</p>
+                    <p class="text-xs text-gray-500">{{ address.next_appointment_date ? toLocaleDate(address.next_appointment_date) : 'Date not available' }}</p>
                   </div>
                 </div>
                 <div v-else class="flex items-center space-x-3">

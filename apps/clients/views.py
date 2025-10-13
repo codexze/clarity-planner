@@ -3,14 +3,16 @@ from rest_framework import permissions, pagination, views, viewsets, response, s
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+
+from django.db.models import Prefetch, Subquery, OuterRef, Q
+from django.utils import timezone
 
 from apps.planning.views import AppointmentFilter
-from apps.planning.serializers import ReminderSerializer
+from apps.planning.serializers import AppointmentSerializer, ReminderSerializer
 from apps.planning.models import Appointment, Reminder
 
 from .models import Gender, Client, KnownAddress, Company
-from .serializers import ClientSerializer, KnownAddressSerializer, AppointmentSerializer, CompanySerializer
+from .serializers import ClientSerializer, ClientDetailSerializer, KnownAddressSerializer, CompanySerializer
 
 class GenderView(viewsets.ViewSet):
     def list(self, request):
@@ -46,8 +48,9 @@ class CompanyView(viewsets.ModelViewSet):
     pagination_class = Pagination
 
     def get_queryset(self):
-        queryset = Company.objects.all()
-        return queryset
+        return Company.objects.select_related().prefetch_related(
+            'clients'  # Prefetch clients for company details
+        )
     
     @action(methods=['get'], detail=False)
     def all(self, request):
@@ -115,9 +118,48 @@ class ClientView(viewsets.ModelViewSet):
     filterset_class = ClientFilter
     pagination_class = Pagination
 
+    def get_serializer_class(self):
+        """Use detailed serializer for retrieve action"""
+        if self.action == 'retrieve':
+            return ClientDetailSerializer
+        return ClientSerializer
+
     def get_queryset(self):
-        queryset = Client.objects.all()
-        return queryset
+        # Use annotations instead of properties for better performance
+        today = timezone.now().date()
+
+        last_appointment_subq = Appointment.objects.filter(
+            client=OuterRef('pk'), 
+            start__date__lt=today
+        ).order_by('-start').values('start')[:1]
+
+        next_appointment_subq = Appointment.objects.filter(
+            client=OuterRef('pk'), 
+            start__date__gte=today
+        ).order_by('start').values('start')[:1]
+
+        return Client.objects.select_related(
+            'company',          # Fix company N+1
+            'created_by',       # Fix audit fields N+1
+            'updated_by'
+        ).prefetch_related(
+            # Optimize appointments with their related data
+            Prefetch(
+                'appointments',
+                queryset=Appointment.objects.select_related(
+                    'service__type',
+                    'employee__calendarsettings',
+                    'client', 
+                    'onsite_address'
+                ).prefetch_related('appointment_addons__addon')
+            ),
+            # Optimize known addresses
+            'known_addresses'
+        ).annotate(
+            # Use annotations instead of properties
+            last_appointment_date=Subquery(last_appointment_subq),
+            next_appointment_date=Subquery(next_appointment_subq)
+        )
 
     @action(methods=['get'], detail=False)
     def filter(self, request):
@@ -157,7 +199,7 @@ class ClientView(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
-            instance.set_record(request.user)
+            instance.set_record(request.user, False)
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -205,7 +247,23 @@ class KnownAddressView(viewsets.ModelViewSet):
     pagination_class = Pagination
 
     def get_queryset(self):
-        queryset = KnownAddress.objects.all()
+        last_appointment_subq = Appointment.objects.filter(
+            client=OuterRef('client_id'), 
+            start__date__lt=timezone.now().date()
+        ).order_by('-start').values('start')[:1]
+
+        next_appointment_subq = Appointment.objects.filter(
+            client=OuterRef('client_id'), 
+            start__date__gte=timezone.now().date()
+        ).order_by('start').values('start')[:1] 
+
+        queryset = KnownAddress.objects.select_related(
+            'client',        
+        ).annotate(
+            # Use annotations instead of properties
+            last_appointment_date=Subquery(last_appointment_subq),
+            next_appointment_date=Subquery(next_appointment_subq)
+        )
         return queryset
     
     @action(methods=['get'], detail=False)

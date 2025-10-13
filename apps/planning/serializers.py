@@ -38,20 +38,17 @@ class CalendarConfigSerializer(serializers.ModelSerializer):
                 'businessHours': business_hours
             }
         }
-    
-class AppointmentSerializer(serializers.ModelSerializer):
-    title = serializers.SerializerMethodField()
-    backgroundColor = serializers.SerializerMethodField()
-    borderColor = serializers.SerializerMethodField()
-    textColor = serializers.SerializerMethodField()
-    addons = serializers.SerializerMethodField()
+
+   
+class AppointmentSerializer(serializers.ModelSerializer):  
     appointment_date = serializers.SerializerMethodField()
     start_time = serializers.SerializerMethodField()
     end_time = serializers.SerializerMethodField()
-    onsite_address_details = serializers.SerializerMethodField()
     client_name = serializers.SerializerMethodField()
     employee_name = serializers.SerializerMethodField()
     service_name = serializers.SerializerMethodField()
+    addons = serializers.SerializerMethodField()
+    payment_amount = serializers.SerializerMethodField()
     is_future = serializers.SerializerMethodField()
     is_past = serializers.SerializerMethodField()
 
@@ -70,14 +67,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
     def get_end_time(self, obj):
         """Returns the end time in HH:mm format"""
         return obj.end.astimezone().strftime("%H:%M")
-
-    def get_onsite_address_details(self, obj):
-        return obj.onsite_address.address if obj.onsite_address else None
-
-    def get_title(self, obj):
-        """Fetches the property from the model"""
-        return obj.title
-
+    
     def get_client_name(self, obj):
         """Returns the client's full name"""
         return obj.client.display if obj.client else None
@@ -89,12 +79,32 @@ class AppointmentSerializer(serializers.ModelSerializer):
     def get_service_name(self, obj):
         """Returns the service name"""
         return  obj.service.display if obj.service else None
-
+    
+    def get_addons(self, obj):
+        return [addon.addon.id for addon in obj.addons] if obj.addons else []
+    
+    def get_payment_amount(self, obj):
+        return obj.payment_amount
+    
     def get_is_future(self, obj):
         return obj.is_future
 
     def get_is_past(self, obj):
         return obj.is_past
+    
+class CalendarAppointmentSerializer(AppointmentSerializer):
+    title = serializers.SerializerMethodField()
+    backgroundColor = serializers.SerializerMethodField()
+    borderColor = serializers.SerializerMethodField()
+    textColor = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Appointment
+        fields = '__all__'
+        read_only_fields = ['title', 'backgroundColor', 'borderColor', 'textColor']
+
+    def get_title(self, obj):
+        return obj.title
 
     def get_backgroundColor(self, obj):
         return obj.color
@@ -104,9 +114,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
     
     def get_textColor(self, obj):
         return obj.textColor
-    
-    def get_addons(self, obj):
-        return [addon.addon.id for addon in obj.addons] if obj.addons else []
 
     def validate(self, data):
         # Get is_onsite from data or instance
@@ -171,17 +178,13 @@ class BlockedTimeSerializer(serializers.ModelSerializer):
     
     def get_textColor(self, obj):
         return obj.textColor
-    
+
+
 class ReminderSerializer(serializers.ModelSerializer):
     icon = serializers.SerializerMethodField()
-    title = serializers.SerializerMethodField()
-    backgroundColor = serializers.SerializerMethodField()
-    borderColor = serializers.SerializerMethodField()
-    textColor = serializers.SerializerMethodField()
     appointment_date = serializers.SerializerMethodField()
     start_time = serializers.SerializerMethodField()
     end_time = serializers.SerializerMethodField()
-    isAllDay = serializers.ReadOnlyField(source='all_day')
 
     class Meta:
         model = Reminder
@@ -202,19 +205,27 @@ class ReminderSerializer(serializers.ModelSerializer):
     def get_icon(self, obj):
         """Fetches the property from the model"""
         return obj.icon
+
+
+class CalendarReminderSerializer(ReminderSerializer):
+    icon = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    backgroundColor = serializers.SerializerMethodField()
+    borderColor = serializers.SerializerMethodField()
+    textColor = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Reminder
+        fields = '__all__'
+        read_only_fields = ['icon', 'title', 'backgroundColor', 'borderColor', 'textColor']
+        
+    def get_icon(self, obj):
+        """Fetches the property from the model"""
+        return obj.icon
     
     def get_title(self, obj):
         """Fetches the property from the model"""
         return obj.title
-
-    def get_is_all_day(self, obj):
-        return obj.all_day
-
-    def get_is_future(self, obj):
-        return obj.is_future
-
-    def get_is_past(self, obj):
-        return obj.is_past
 
     def get_backgroundColor(self, obj):
         return obj.color

@@ -63,8 +63,11 @@ class EmployeeView(viewsets.ModelViewSet):
     pagination_class = Pagination
 
     def get_queryset(self):
-        queryset = Employee.objects.all()
-        return queryset
+        return Employee.objects.select_related(
+        ).prefetch_related(
+            'groups',  # Prefetch user groups to avoid N+1 in has_role
+            'employeeservice_set__service_type'  # Prefetch services
+        )
 
     @action(methods=['get'], detail=False)
     def filter(self, request):

@@ -178,7 +178,7 @@
                                 </div>
                                 <p class="text-xs text-gray-500">Last Visit</p>
                                 <p class="text-sm font-medium text-gray-900">
-                                  {{ client.last_appointment ? toLocaleDateTime(client.last_appointment) : 'No previous visits' }}
+                                  {{ client.last_appointment_date ? toLocaleDateTime(client.last_appointment_date) : 'No previous visits' }}
                                 </p>
                               </div>
                               <div class="text-center">
@@ -187,7 +187,7 @@
                                 </div>
                                 <p class="text-xs text-gray-500">Next Visit</p>
                                 <p class="text-sm font-medium text-gray-900">
-                                  {{ client.next_appointment ? toLocaleDateTime(client.next_appointment) : 'No upcoming visits' }}
+                                  {{ client.next_appointment_date ? toLocaleDateTime(client.next_appointment_date) : 'No upcoming visits' }}
                                 </p>
                               </div>
                             </div>

@@ -42,8 +42,9 @@ class AddonView(viewsets.ModelViewSet):
     pagination_class = Pagination
 
     def get_queryset(self):
-        queryset = Addon.objects.all()
-        return queryset
+        return Addon.objects.select_related(
+            'type',
+        )
 
     @action(methods=['get'], detail=False)
     def filter(self, request):
@@ -102,8 +103,9 @@ class ServiceView(viewsets.ModelViewSet):
     pagination_class = Pagination
 
     def get_queryset(self):
-        queryset = Service.objects.all()
-        return queryset
+        return Service.objects.select_related(
+            'type',
+        )
 
     @action(methods=['get'], detail=False)
     def filter(self, request):
@@ -162,8 +164,7 @@ class AddonView(viewsets.ModelViewSet):
     pagination_class = Pagination
 
     def get_queryset(self):
-        queryset = Addon.objects.all()
-        return queryset
+        return Addon.objects.select_related()
 
     @action(methods=['get'], detail=False)
     def filter(self, request):

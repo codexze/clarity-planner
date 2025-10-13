@@ -9,7 +9,7 @@ from apps.clients.models import KnownAddress
 from apps.services.models import Addon
 
 from .models import Appointment, BlockedTime, Reminder, ReminderReason, AppointmentAddon
-from .serializers import AppointmentSerializer, BlockedTimeSerializer, ReminderSerializer
+from .serializers import CalendarAppointmentSerializer,AppointmentSerializer, BlockedTimeSerializer, CalendarReminderSerializer, ReminderSerializer
 
 class ReminderReasonView(viewsets.ViewSet):
     def list(self, request):
@@ -73,8 +73,16 @@ class AppointmentView(viewsets.ModelViewSet):
     pagination_class = Pagination
 
     def get_queryset(self):
-        queryset = Appointment.objects.all()
-        return queryset
+        return Appointment.objects.select_related(
+            'client',                           
+            'service__type',                   
+            'employee__calendarsettings',       
+            'onsite_address',                   
+            'created_by',
+            'updated_by'
+        ).prefetch_related(
+            'appointment_addons__addon'         
+        )
 
     @action(methods=['get'], detail=False)
     def filter(self, request):
@@ -110,7 +118,7 @@ class AppointmentView(viewsets.ModelViewSet):
                 # If parsing fails, return all appointments for the employee
                 pass
         
-        appointments = AppointmentSerializer(queryset, many=True)
+        appointments = CalendarAppointmentSerializer(queryset, many=True)
         return response.Response(appointments.data)
     
     @transaction.atomic
@@ -186,8 +194,11 @@ class BlockedTimeView(viewsets.ModelViewSet):
     serializer_class = BlockedTimeSerializer
 
     def get_queryset(self):
-        queryset = BlockedTime.objects.all()
-        return queryset
+        return BlockedTime.objects.select_related(
+            'employee__calendarsettings',
+            'created_by',
+            'updated_by'
+        )
     
     @action(methods=['get'], detail=False, url_path='employee/(?P<username>[^/.]+)')
     def employee_blocked(self, request, username=None):
@@ -254,8 +265,12 @@ class ReminderView(viewsets.ModelViewSet):
     serializer_class = ReminderSerializer
 
     def get_queryset(self):
-        queryset = Reminder.objects.all()
-        return queryset
+        return Reminder.objects.select_related(
+            'client',
+            'employee__calendarsettings',
+            'created_by',
+            'updated_by'
+        )
     
     @action(methods=['get'], detail=False, url_path='reasons')
     def reasons(self, request):
@@ -285,7 +300,7 @@ class ReminderView(viewsets.ModelViewSet):
                 # If parsing fails, return all reminders for the employee
                 pass
         
-        reminders = ReminderSerializer(queryset, many=True)
+        reminders = CalendarReminderSerializer(queryset, many=True)
         return response.Response(reminders.data)
 
     def create(self, request, *args, **kwargs):

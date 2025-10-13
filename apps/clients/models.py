@@ -24,7 +24,7 @@ class Client(Subrecord):
     first_name = models.CharField(max_length=255)
     surname = models.CharField(max_length=255)
     date_of_birth = models.DateField()
-    gender = models.CharField(choices=Gender.choices, default=Gender.unknown)
+    gender = models.CharField(max_length=10, choices=Gender.choices, default=Gender.unknown)
     email = models.CharField(max_length=255, blank=True, null=True)
     mobile = models.CharField(max_length=50, blank=True, null=True)
     is_active = models.BooleanField(default=True) #switched off make client inactive and not in default filter
@@ -43,33 +43,30 @@ class Client(Subrecord):
     def display(self):
         return f"{self.name} ({self.age}Y)"
     
-    @property
-    def last_appointment(self):
+    # Optimized methods that work with prefetched data
+    def get_last_appointment(self):
+        """Use when appointments are prefetched to avoid DB hit"""
         today = datetime.date.today()
-        return self.appointments.filter(start__date__lt=today).order_by('-start').first()
-    
-    @property
-    def next_appointment(self):
-        today = datetime.date.today()
-        return self.appointments.filter(start__date__gte=today).order_by('-start').first()
-    
-    @property
-    def last_used_address(self):
-        last_onsite_appointment = self.appointments.filter(is_onsite=True).order_by('-start').first()
-        if last_onsite_appointment:
-            return last_onsite_appointment.onsite_address
+        appointments = [apt for apt in self.appointments.all() if apt.start.date() < today]
+        if appointments:
+            return max(appointments, key=lambda x: x.start)
         return None
     
-    @property
-    def known_addresses(self):
-        return self.known_addresses.filter()
+    def get_next_appointment(self):
+        """Use when appointments are prefetched to avoid DB hit"""
+        today = datetime.date.today()
+        appointments = [apt for apt in self.appointments.all() if apt.start.date() >= today]
+        if appointments:
+            return min(appointments, key=lambda x: x.start)
+        return None
     
-    @property
-    def active_known_addresses(self):
-        return self.known_addresses.filter(is_active=True)
-    
-    def get_appointments(self):
-        return self.appointments.all()
+    def get_last_used_address_optimized(self):
+        """Use when appointments are prefetched to avoid DB hit"""
+        onsite_appointments = [apt for apt in self.appointments.all() if apt.is_onsite]
+        if onsite_appointments:
+            last_appointment = max(onsite_appointments, key=lambda x: x.start)
+            return last_appointment.onsite_address
+        return None
     
     def __str__(self):
         return self.display
