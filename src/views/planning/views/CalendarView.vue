@@ -80,6 +80,21 @@ export default {
     ...mapActions('employees', ['getConfig', 'getEmployees']),
     ...mapActions('planning', ['rescheduleAppointment', 'rescheduleBlockedTime']),
 
+    // Intelligent time slot suggestions
+    // const suggestOptimalTimeSlots = (clientHistory, serviceRequirements) => {
+    // Analyze client's appointment history
+    // Consider service duration and requirements
+    // Factor in travel time for onsite appointments
+    // Return ranked suggestions
+    // }
+
+    // Conflict resolution with smart rescheduling
+    // const handleScheduleConflict = (conflictingAppointments) => {
+    // Suggest alternative time slots
+    // Auto-negotiate with clients
+    // Batch reschedule related appointments
+    // }
+
     // Authenticated event fetch methods
     async fetchAppointments(info, successCallback, failureCallback) {
       try {

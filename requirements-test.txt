@@ -1,0 +1,8 @@
+# Additional requirements for testing
+pytest==8.0.0
+pytest-django==4.8.0
+pytest-cov==4.0.0
+factory-boy==3.3.0
+freezegun==1.4.0  # For date/time testing
+model-bakery==1.17.0  # Alternative to factory-boy
+django-test-plus==2.2.2  # Enhanced testing utilities
