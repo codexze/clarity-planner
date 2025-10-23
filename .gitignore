@@ -4,6 +4,9 @@ package-lock.json
 /dist
 /jsons
 
+# Documentation files
+/docs/AI_ASSISTANT_PROJECT_OVERVIEW.md
+
 # Environment files (keep .env.example)
 .env
 .env.local
